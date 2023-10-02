@@ -1,9 +1,10 @@
 \documentclass[10pt,a4paper]{article}
 
 \begin{document}
-\section*{Subject: Phase 1 - Tanna-Shah: your proposed dissertation title}
+\section*{Subject: Phase 1 - Tanna-Shah: Creating an \mbox{Interpretable} Chess Engine}
 
 Phase 1 Project Selection Status Report
+\vspace{5pt}
 
 Name: Kai Tanna-Shah
 
@@ -14,24 +15,25 @@ CRSID: kt507
 Director of Studies: Dr John Fawcett
 
 Please complete 1, 2 and 3 below.
-\section{Please write 100 words on your current project ideas:} 
+\begin{enumerate}
+\item Please write 100 words on your current project ideas:
 
+Chess engines are becoming increasingly more powerful, and have long been able to outperform the best humans in the world. As such they are used by many top players to improve their understanding of positions, however, less experienced players often have difficulty in interpreting why a chess engine is suggesting a certain move. My approach would involve fitting a more explainable evaluation model, with interpretable features of a position in order to provide explanations alongside sequences of moves it suggests. The fitted model will be used with a min-max algorithm to identify the best moves
 
-
-\section{Please list names of potential project supervisors, indicating
+\item Please list names of potential project supervisors, indicating
 any interactions you have had with them, for example: not
-contacted, awaiting reply, in discussion, agreed to supervise.}
+contacted, awaiting reply, in discussion, agreed to supervise.
 
 David Khachaturov: agreed to supervise
 
 
-\section{Is there any chance that your project will involve any
+\item Is there any chance that your project will involve any
 computing resources other than the Computing Service's MCS and
 software that is already installed there, for example: your own
 machine, machines in College, special peripherals, imported
 software packages, special hardware, network access, substantial
 extra disc space on the MCS. 
-If so indicate below what, and what it is needed for.}
+If so indicate below what, and what it is needed for.
 
 My personal laptop:
 \begin{itemize}
@@ -40,6 +42,12 @@ My personal laptop:
     \item All project related work will by synced to my Google Drive, as well as being held under git on GitHub
 \end{itemize}
 
+Stockfish chess engine:
+\begin{itemize}
+    \item To be used as a "ground truth" evaluation of a position
+    \item To be used to train the interpretable model
+\end{itemize}
+\end{enumerate}
 \end{document}
 
 
