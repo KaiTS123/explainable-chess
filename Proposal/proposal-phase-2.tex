@@ -11,6 +11,9 @@ However, less experienced players will have more difficulty identifying these di
 \\\\
 My project aims to combine approaches to interpretable machine learning models with techniques from more traditional chess engines in order to provide accurate evaluations and move suggestions, as well as giving reasons for them. This would be achieved by training an interpretable model on a dataset of chess positions, with the features being tactical and strategical aspects of the position and the output being the evaluation assigned to the position by a leading chess engine. A chess engine will then be built using the trained model as the evaluation function, and combining the interpretable output of the positions in the search tree to provide reasoning for the evaluation in terms of tactics and strategy.
 
+\section*{Starting Point}
+The project will start from scratch, so I will devise and build the interpreatable evaluation model first
+
 \section*{Work to be Undertaken}
 \begin{enumerate}
     \item \textbf{Preparing the data:}
@@ -20,7 +23,7 @@ My project aims to combine approaches to interpretable machine learning models w
     \item \textbf{Training the model:}
     \\Once I have chosen which model to use, I will need to train the model using the dataset that I have prepared. This stage may also involve the tuning of some hyperparameters depending on the model which I choose to use.
     \item \textbf{Implementing the chess engine:}
-    \\Using the trained model as an evaluation function, I will implement a chess engine using the minimax algorithm, using techniques such as alpha-beta pruning to increase the depth which can be computed to in the same amount of time. During this stage I will also need to determine how to combine the interpretations of the children into the interpretation for a position.
+    \\Using the trained model as an evaluation function, I will implement a chess engine using the minimax algorithm. During this stage I will also need to determine how to combine the interpretations of the children into the interpretation for a position.
     \item \textbf{Evaluating the chess engine:}
     \\There are two aspects of the chess engine which will need to be evaluated, the accuracy of the evaluations it assigns to positions, and the explanations for these evaluations. The accuracy of the evaluations can be evaluated by comparing them to the evaluations assigned by the original chess engine that was used to train the model. The interpretations will be more difficult to evaluate, as they are often more subjective. One approach could be to find a dataset of puzzles which have a defined explanation for which is the best move.
 
@@ -32,6 +35,8 @@ My project aims to combine approaches to interpretable machine learning models w
     \\In order to make it easier for users to visualize the interpretations, I could design a graphical user interface which highlights and explains the tactical and strategic aspects of the position that contribute most to the evaluation.
     \item \textbf{LLM to provide natural language explanations:}
     \\In order to make the explanations for the evaluation easier to understand for beginners, I could use a Large Language Model to combine the most important factors with explanations of how they create an advantage for one player to provide a more natural explanation.
+    \item \textbf{Using techniques to increase search depth:}
+    \\In order to improve the search depth that can be reached I could use techniques such as alpha-beta pruning and iterative deepening in my chess engine to improve the accuracy of evaluations in the same amount of time.
 \end{enumerate}
 
 
@@ -39,7 +44,7 @@ My project aims to combine approaches to interpretable machine learning models w
 \section*{Success Criteria}
 The project should be considered a success if the chess engine is able to produce sensible evaluations of chess positions, as well as the tactical and strategical aspects that contributed most to that evaluation. The project should be considered very successful if the evaluations align closely with those from the best chess engines, and if it produces explanations for the evaluations in natural language and/or through a visualisation.
 
-\section*{Starting Point}
+
 
 
 \section*{Timetable}
