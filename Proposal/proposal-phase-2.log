@@ -51,8 +51,22 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 3.
 LaTeX Font Info:    ... okay on input line 3.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 3.
 LaTeX Font Info:    ... okay on input line 3.
- [1
 
-]
-(proposal-phase-2.aux) )
-Output written on proposal-phase-2.xdv (1 page, 1608 bytes).
+Underfull \hbox (badness 10000) in paragraph at lines 7--12
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7--12
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 15--17
+
+ []
+
+[1
+
+] [2] (proposal-phase-2.aux) )
+Output written on proposal-phase-2.xdv (2 pages, 25780 bytes).
