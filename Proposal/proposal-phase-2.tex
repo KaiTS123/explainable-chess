@@ -1,4 +1,5 @@
-\documentclass[10pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
 
 \begin{document}
 
@@ -12,8 +13,17 @@ My project aims to combine approaches to interpretable machine learning models w
 
 \section*{Work to be Undertaken}
 \begin{enumerate}
-    \item \textbf{:}
-    \\
+    \item \textbf{Preparing the data:}
+    \\I will need to familiarize myself with different representations of chess positions, and decide on the best one to use based on how quickly I will be able to extract the tactical and strategical features, as well as which is supported by the engine I will use for my training data evaluations. I will also need to find and clean a dataset of chess positions in this representation to use as training and testing data for my interpretable model, by calculating the evaluation of each position using an existing chess engine.
+    \item \textbf{Devising the model:}
+    \\I will need to investigate and decide on the model which is most appropriate for the project. This will involve researching and experimenting with multiple interpretable models to find one that provides both accurate evaluations as well as having clear interpretations. During this stage I will also need to decide on which features I use. The speed at which the model can generate evaluations for a new position will also be an important factor, since it will determine the search depth that I will be able to use in the engine.
+    \item \textbf{Training the model:}
+    \\Once I have chosen which model to use, I will need to train the model using the dataset that I have prepared. This stage may also involve the tuning of some hyperparameters depending on the model which I choose to use.
+    \item \textbf{Implementing the chess engine:}
+    \\Using the trained model as an evaluation function, I will implement a chess engine using the minimax algorithm, using techniques such as alpha-beta pruning to increase the depth which can be computed to in the same amount of time. During this stage I will also need to determine how to combine the interpretations of the children into the interpretation for a position.
+    \item \textbf{Evaluating the chess engine:}
+    \\There are two aspects of the chess engine which will need to be evaluated, the accuracy of the evaluations it assigns to positions, and the explanations for these evaluations. The accuracy of the evaluations can be evaluated by comparing them to the evaluations assigned by the original chess engine that was used to train the model. The interpretations will be more difficult to evaluate, as they are often more subjective. One approach could be to find a dataset of puzzles which have a defined explanation for which is the best move.
+
 \end{enumerate}
 
 \section*{Extensions}
@@ -27,8 +37,10 @@ My project aims to combine approaches to interpretable machine learning models w
 
 
 \section*{Success Criteria}
+The project should be considered a success if the chess engine is able to produce sensible evaluations of chess positions, as well as the tactical and strategical aspects that contributed most to that evaluation. The project should be considered very successful if the evaluations align closely with those from the best chess engines, and if it produces explanations for the evaluations in natural language and/or through a visualisation.
 
 \section*{Starting Point}
+
 
 \section*{Timetable}
 
