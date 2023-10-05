@@ -7,13 +7,13 @@
 \section*{Introduction}
 Chess engines such as Stockfish are becoming increasingly more powerful, and are now able to easily outperform even the best humans in much less time. Many players use the evaluations and continuations suggested by these engines to better understand positions and improve their ability. They often achieve this by looking through the various continuations of moves that the engine suggests in order to identify the tactical or strategical advantage that one move has over another.
 \\\\
-However, less experienced players will have more difficulty identifying these differences, since they will have encountered the tactical and strategic ideas less frequently in the games they have played. Furthermore, many beginners will not have been explicitly taught about some tactical ideas, and may not be able to understand why a position is favourable for one player even after going deep down a path of suggested moves. Understanding why a certain move was better than another is one of the most important aspects needed to learn from a mistake made in one game, and to make a better move in a similar position in future games. My project aims to provide accurate evaluations and move suggestions, as well as giving reasons for them.
+However, less experienced players will have more difficulty identifying these differences, since they will have encountered the tactical and strategic ideas less frequently in the games they have played. Furthermore, many beginners will not have been explicitly taught about some tactical ideas, and may not be able to understand why a position is favourable for one player even after going deep down a path of suggested moves. Understanding why a certain move was better than another is one of the most important aspects needed to learn from a mistake made in one game, and to make a better move in a similar position in future games. My project aims to provide evaluations and move suggestions, as well as giving reasons for them. The reasoning will be in the form of which features of the position had the highest weighting towards the evaluation score that the engine assigns.
 
 \section*{Background}
 Since Deep Blue first beat Kasparov in 1997 there have been many chess engines which can far outperform the best humans in both speed and chess ability, such as Stockfish which is currently regarded as the most advanced chess engine. However there are not many chess engines which also provide explanations, or a way of interpreting why the suggested move and evaluation is correct. There is a commercially sold piece of software which does claim to achieve this, however they have not published details of how they determine the explanations.
 
 \section*{Starting Point}
-The project will start from scratch, so I will devise and build the interpreatable evaluation model first. This work is likely to use a library such as NumPy for the implementations of the models, since it will be better tested and optimized than my implementation of the same mathematical model would be.
+The project will start from scratch, so I will devise and build the interpreatable evaluation model first. This work is likely to use a library such as NumPy for the implementation of a linear regression model and any other models I use, since it will be better tested and optimized than my implementation of the same mathematical model would be.
 \\\\
 I have an understanding of the algorithms that I will be using for the engine, from the IB Artificial Intelligence course, the IB Data Science course, the IA Algorithms course and from my own interests, however I have no experience in building a chess engine. The Part II Natural Language Processing unit of assessment that I will take in Michaelmas 2023 will also add to my existing knowledge. I know how to play chess, and have a reasonable ability and understanding of the game.
 
@@ -38,7 +38,7 @@ I have an understanding of the algorithms that I will be using for the engine, f
     \\I will extend the chess engine to use a weighted sum of the extracted features in the children positions of each node in the search tree. These feature weights will be passed up the search tree to the root node, to give weights to the most important features in determining the evaluation of the position.
 
     \item \textbf{Fitting the evaluation function model:}
-    \\I will fit a linear regression model using a dataset of chess positions and the evaluation assigned to each position by Stockfish. The linear regression model will assign weights to each of the features extracted from the position, which will ensure the evaluations are still interpretable.
+    \\I will fit a linear regression model using a dataset of chess positions and the evaluation assigned to each position by Stockfish. The linear regression model will assign weights to each of the features extracted from the position, which will ensure the evaluations are still interpretable. I will also explore the possibility of other models that could be used here.
 
     % \item \textbf{Devising the model:}
     % \\I will need to investigate and decide on the model which is most appropriate for the project. This will involve researching and experimenting with multiple interpretable models to find one that provides both accurate evaluations as well as having clear interpretations. During this stage I will also need to decide on which features I use. The speed at which the model can generate evaluations for a new position will also be an important factor, since it will determine the search depth that I will be able to use in the engine.
@@ -65,7 +65,9 @@ I have an understanding of the algorithms that I will be using for the engine, f
 \begin{enumerate}
     \item Michaelmas weeks 2-3 (12th October - 25th October)
     \begin{itemize}
-        \item 
+        \item Familiarize myself with the representation of chess positions and evaluations in the dataset
+        \item Research existing chess engines and their approaches to generating evaluations and moves
+        \item Set up the project and the repository, researching any libraries that I will need
     \end{itemize}
     Deliverables
     \begin{itemize}
@@ -78,11 +80,9 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Michaelmas weeks 4-5 (26th October - 8th November)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Write a framework to support representing chess positions, and applying moves to a position
+        \item Write a function to generate all of the legal moves in a position, and a function to check if a position is a valid chess board
+        \item Write unit tests to ensure that the framework is able to determine legal moves and positions
     \end{itemize}
     Other work
     \begin{itemize}
@@ -91,20 +91,19 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Michaelmas weeks 6-7 (9th November - 22nd November)
     \begin{itemize}
-        \item 
+        \item Write a trivial evaluation function (material count and checkmate)
+        \item Implement the minimax search function
     \end{itemize}
     Deliverables
     \begin{itemize}
-        \item 
+        \item A functional chess engine
     \end{itemize}
 
     \item Michaelmas weeks 8 \& Christmas Vacation Week 1 (23rd November - 6th December)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Decide on which features to extract from the position
+        \item Write the functions which extract the features from a position
+        \item Write an evaluation function which uses manually decided weightings of these features
     \end{itemize}
     Other work
     \begin{itemize}
@@ -113,34 +112,34 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Christmas Vacation weeks 2-3 (7th December - 20th December)
     \begin{itemize}
-        \item 
+        \item Extend the minimax algorithm to pass weightings of how much each feature contributed to the evaluation up the search tree
+        \item Fit a linear regression model to get new weights for the features
     \end{itemize}
     Deliverables
     \begin{itemize}
-        \item 
+        \item Chess engine that provides weightings of features as well as evaluations
     \end{itemize}
 
     \item Christmas Vacation weeks 4-5 (21st December - 3rd January)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Evaluate the chess engine against other chess engines in order to estimate its ELO
+        \item Evaluate the explanations by testing the engine on a puzzle with known tactical or strategic themes, to see if the engine is able to identify them correctly
     \end{itemize}
 
     \item Christmas Vacation weeks 6-7 (4th January - 17th January)
     \begin{itemize}
-        \item 
+        \item Apply alpha-beta pruning to the engine
+        \item Write a first draft of the progress report using the evaluations to be reviewed by my supervisor
     \end{itemize}
     Deliverables
     \begin{itemize}
-        \item 
+        \item First draft of progress report
     \end{itemize}
 
     \item Lent weeks 1-2 (18th January - 31st January)
     \begin{itemize}
-        \item 
+        \item Apply iterative deepening and other techniques I come across during research to improve the depth that the engine can search to
+        \item Finish the progress report with feedback from supervisor
     \end{itemize}
     Deliverables
     \begin{itemize}
@@ -149,7 +148,8 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Lent weeks 3-4 (1st February - 14th February)
     \begin{itemize}
-        \item 
+        \item Set up framework for using an LLM to convert the feature weights into an explanation in natural language
+        \item Prepare and present progress report
     \end{itemize}
     Deliverables
     \begin{itemize}
@@ -162,20 +162,17 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Lent weeks 5-6 (15th February - 28th February)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Fine tune the prompt for the LLM
+        \item Run the evaluations for the updated versions of the chess engine
     \end{itemize}
 
     \item Lent weeks 7-8 (29th February - 13th March)
     \begin{itemize}
-        \item 
+        \item Begin writing preparation section of the dissertation
     \end{itemize}
     Deliverables
     \begin{itemize}
-        \item 
+        \item Completed project
     \end{itemize}
     Other work
     \begin{itemize}
@@ -184,34 +181,27 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
     \item Easter Vacation weeks 1-2 (14th March - 27th March)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Finish writing preparation section of dissertation
+        \item Write implementation section of dissertation
     \end{itemize}
 
     \item Easter Vacation weeks 3-4 (28th March - 10th April)
     \begin{itemize}
-        \item 
+        \item Write evaluation and conclusion sections of dissertation
     \end{itemize}
     Deliverables
     \begin{itemize}
-        \item 
+        \item First draft of dissertation submitted to supervisor and director of studies
     \end{itemize}
 
     \item Easter Vacation weeks 5-6 (11th April - 24th April)
     \begin{itemize}
-        \item 
-    \end{itemize}
-    Deliverables
-    \begin{itemize}
-        \item 
+        \item Review feedback and make changes to the dissertation 
     \end{itemize}
 
     \item Easter weeks 1-2 (25th April - 8th May)
     \begin{itemize}
-        \item 
+        \item Make final changes to dissertation based on continued feedback
     \end{itemize}
     Deliverables
     \begin{itemize}
