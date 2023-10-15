@@ -4,13 +4,22 @@
 \begin{document}
 
 \part*{Project Proposal}
-\section*{Introduction}
-Chess engines such as Stockfish are becoming increasingly more powerful, and are now able to easily outperform even the best humans in much less time. Many players use the evaluations and continuations suggested by these engines to better understand positions and improve their ability. They often achieve this by looking through the various continuations of moves that the engine suggests in order to identify the tactical or strategical advantage that one move has over another.
-\\\\
-However, less experienced players will have more difficulty identifying these differences, since they will have encountered the tactical and strategic ideas less frequently in the games they have played. Furthermore, many beginners will not have been explicitly taught about some tactical ideas, and may not be able to understand why a position is favourable for one player even after going deep down a path of suggested moves. Understanding why a certain move was better than another is one of the most important aspects needed to learn from a mistake made in one game, and to make a better move in a similar position in future games. My project aims to provide evaluations and move suggestions, as well as giving reasons for them. The reasoning will be in the form of which features of the position had the highest weighting towards the evaluation score that the engine assigns.
 
 \section*{Background}
 Since Deep Blue first beat Kasparov in 1997 there have been many chess engines which can far outperform the best humans in both speed and chess ability, such as Stockfish which is currently regarded as the most advanced chess engine. However there are not many chess engines which also provide explanations, or a way of interpreting why the suggested move and evaluation is correct. There is a commercially sold piece of software which does claim to achieve this, however they have not published details of how they determine the explanations.
+
+\paragraph*{Terms}
+\begin{itemize}
+    \item \textbf{ELO} - A method used to calculate the relative strength of players in chess and other zero-sum games
+    \item \textbf{Tactic} - A move or sequence of moves which gives a short term advantage to a player, often by forcing the opposing player to choose between two negative outcomes (such as by attacking two pieces at the same time)
+    \item \textbf{Strategy} - Long term ideas in the chess game to try to gain an advantage over the opponent, such as the structure of the pawns
+    \item \textbf{Evaluation} - In the context of chess, the evaluation function attempts to assign a value to the advantage that either player has, in terms of the number of pawns that the advantage is equivalent to (with an advantage for the white player being positive, and negative for white)
+\end{itemize}
+
+\section*{Introduction}
+Chess engines such as Stockfish are becoming increasingly more powerful, and are now able to easily outperform even the best humans with much less computation/thinking time per move. They achieve this by searching through the many possible positions that could be reached from the starting position, and evaluating them based on a number of features of the position. The best move can then be determined using the minimax algorithm, by selecting the move which results in the most favourable position (in terms of the evaluation) for the player. Many players use the evaluations and continuations of moves suggested by these engines to better understand positions and improve their ability. They often achieve this by looking through the various continuations of moves that the engine suggests in order to identify the tactical or strategical advantage that one move has over another.
+\\\\
+However, less experienced players will have more difficulty identifying these differences, since they will have encountered the tactical and strategic ideas less frequently in the games they have played. Furthermore, many beginners will not have been explicitly taught about some tactical ideas, and may not be able to understand why a position is favourable for one player even after going deep down a path of suggested moves. Understanding why a certain move was better than another is one of the most important aspects needed to learn from a mistake made in one game, and to make a better move in a similar position in future games. My project aims to provide both move suggestions and reasons for why the move is the best available. The reasoning will be in the form of which tactical and strategical features of the position had the biggest impact on determining which move is the best available in the position.
 
 \section*{Starting Point}
 The project will start from scratch, so I will devise and build the interpretable evaluation model first. This work is likely to use a library such as NumPy for the implementation of a linear regression model and any other models I use, since it will be better tested and optimized than my implementation of the same mathematical model would be.
@@ -19,9 +28,11 @@ I have an understanding of the algorithms that I will be using for the engine, f
 
 \section*{Success Criteria}
 \begin{itemize}
-    \item The project should be considered a success if the chess engine is able to produce sensible evaluations of all legal chess positions, as well as the tactical and strategical aspects that contributed most to that evaluation. 
-    \item The project should be considered very successful if I produce a chess engine with explanations, that has an estimated ELO of above 1500.
+    \item The project should be considered a success if the chess engine is able to produce evaluations of all legal chess positions, as well as the tactical and strategical aspects that contributed most to that evaluation. 
+    \item The project should be considered a success if the evaluation matches Stockfish in 80\% of test positions in assigning a position to approximately equal (-1.0 to 1.0 pawns), winning for white or winning for black.
+    \item The project should be considered very successful if I produce a chess engine that has an estimated ELO of above 1500 (estimated by testing the engine against other engines of a known ELO).
     \item The project should be considered very successful if it is able to produce explanations for its evaluations and moves in natural language.
+    \item The project should be considered very successful if the explanations match the expected explanation for 80\% of the positions in a test suite (these positions will come from puzzles where the best move and explanation for this move is known, and then manually reviewed to check that the explanations match closely).
 \end{itemize}
 
 \section*{Work to be Undertaken}
@@ -29,10 +40,10 @@ I have an understanding of the algorithms that I will be using for the engine, f
     % \item \textbf{Preparing the data:}
     % \\I will need to familiarize myself with different representations of chess positions, and decide on the best one to use based on how quickly I will be able to extract the tactical and strategical features, as well as which is supported by the engine I will use for my training data evaluations. I will also need to find and clean a dataset of chess positions in this representation to use as training and testing data for my interpretable model, by calculating the evaluation of each position using an existing chess engine.
     \item \textbf{Implementing the chess engine:}
-    \\I will implement a chess engine using the minimax algorithm. The engine will be programmed in such a way that any function that takes in a position and outputs an evalutation can be used. During this stage I will test that the move generation is correct, and that all legal positions are being explored.
+    \\I will implement a chess engine using the minimax algorithm. The engine will be programmed in such a way that any function that takes in a position and outputs an evaluation can be used. During this stage I will test that the move generation is correct, and that all legal positions are being explored.
 
     \item \textbf{Extracting features from a position:}
-    \\During this stage I will write a function to encode a chess position into a set of interpretable tactical and positional features, such as the material count of each side and whether a piece is attacking two other pieces at once. I will then create the initial evaluation function by manually deciding on weights for these features.
+    \\During this stage I will write functions to encode a chess position into a set of interpretable tactical and positional features, such as the material count of each side and whether a piece is attacking two other pieces at once. I will then create the initial evaluation function by manually deciding on weights for these features. In order to decide on which features to use, I will use educational chess material such as textbooks.
 
     \item \textbf{Extending the chess engine to provide interpretations:}
     \\I will extend the chess engine to use a weighted sum of the extracted features in the children positions of each node in the search tree. These feature weights will be passed up the search tree to the root node, to give weights to the most important features in determining the evaluation of the position.
@@ -44,7 +55,7 @@ I have an understanding of the algorithms that I will be using for the engine, f
     % \\I will need to investigate and decide on the model which is most appropriate for the project. This will involve researching and experimenting with multiple interpretable models to find one that provides both accurate evaluations as well as having clear interpretations. During this stage I will also need to decide on which features I use. The speed at which the model can generate evaluations for a new position will also be an important factor, since it will determine the search depth that I will be able to use in the engine.
 
     % \item \textbf{Training the model:}
-    % \\Once I have chosen which model to use, I will need to train the model using the dataset that I have prepared. This stage may also involve the tuning of some hyperparameters depending on the model which I choose to use.
+    % \\Once I have chosen which model to use, I will need to train the model using the dataset that I have prepared. This stage may also involve the tuning of some hyperparameter depending on the model which I choose to use.
     
     \item \textbf{Evaluating the chess engine:}
     \\There are two aspects of the chess engine which will need to be evaluated, the performance of the chess engine measured in ELO, and the explanations of its evaluations. The accuracy of the evaluations can be evaluated by testing its ability to beat chess engines of a variety of known ELO levels. The interpretations will be more difficult to evaluate, as they are often more subjective. One approach could be to find a dataset of puzzles which have a defined explanation for which is the best move.
@@ -58,7 +69,7 @@ I have an understanding of the algorithms that I will be using for the engine, f
     \item \textbf{LLM to provide natural language explanations:}
     \\In order to make the explanations for the evaluation easier to understand for beginners, I could use a Large Language Model to combine the most important factors with explanations of how they create an advantage for one player to provide a more natural explanation.
     \item \textbf{Using techniques to increase search depth:}
-    \\In order to improve the search depth that can be reached I could use techniques such as alpha-beta pruning and iterative deepening in my chess engine to improve the accuracy of evaluations in the same amount of time.
+    \\In order to improve the search depth that can be reached I could use search techniques such as alpha-beta pruning and iterative deepening in my chess engine to reduce the number of positions that need to be searched and evaluated at each depth. This will allow a greater search depth to be reached in the same amount of time.
 \end{enumerate}
 
 \section*{Timetable}
