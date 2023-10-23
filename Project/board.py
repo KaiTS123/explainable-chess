@@ -7,10 +7,6 @@ class Colour(Enum):
     BLACK = 2
 
 class Board:
-    @classmethod
-    def getStartingBoard(cls) -> None:
-        return cls('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-
     def __init__(self, FEN:str) -> None:
         self.whitePawns = bitarray(64)
         self.whiteKnights = bitarray(64)
@@ -100,6 +96,10 @@ class Board:
 
         # Number of full moves (starts at 1 and increments after blacks move)
         self.fullMoves = int(fields[5])
+
+    @classmethod
+    def getStartingBoard(cls) -> None:
+        return cls('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
     def getString(self):
         result = ''
