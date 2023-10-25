@@ -231,9 +231,10 @@ class Board:
         return result
 
 def main():
-    FEN = 'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
+    FEN = '5r2/pb5k/1p2p1rp/4B3/3P2P1/4KP2/P3P2R/7R b - - 0 28'
     board = Board(FEN)
     print(board.getString())
+    print(board.getFENString())
 
 if __name__ == "__main__":
     main()
