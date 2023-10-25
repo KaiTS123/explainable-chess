@@ -302,4 +302,4 @@ TSWLatexianTemp*
 
 
 .vscode/*
-*/data/*
+*/stockfish_evals/*.csv
