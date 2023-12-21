@@ -7,6 +7,12 @@ import copy
 class Colour(Enum):
     WHITE = 1
     BLACK = 2
+    
+    def opposite(col):
+        if col == Colour.BLACK:
+            return Colour.WHITE
+        else:
+            return Colour.BLACK
 
 class Board:
     def __init__(self, FEN=None, orig=None) -> None:
@@ -121,8 +127,8 @@ class Board:
             self.pieces = self.blackPieces | self.whitePieces
 
             self.toPlay = orig.toPlay
-            self.castlingRights = orig.castlingRights
-            self.enPassant = orig.enPassant
+            self.castlingRights = copy.copy(orig.castlingRights)
+            self.enPassant = copy.copy(orig.enPassant)
             self.halfMoveClock = orig.halfMoveClock
             self.fullMoves = orig.fullMoves
 
@@ -828,6 +834,67 @@ class Board:
         self.blackPieces = self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks | self.blackQueens | self.blackKing
         self.pieces = self.blackPieces | self.whitePieces
 
+    def evalMaterial(self) -> int:
+        whiteMaterial = self.whitePawns.count() + self.whiteBishops.count()*3 + self.whiteKnights.count()*3 + self.whiteRooks.count()*5 + self.whiteQueens.count()*9
+        blackMaterial = self.blackPawns.count() + self.blackBishops.count()*3 + self.blackKnights.count()*3 + self.blackRooks.count()*5 + self.blackQueens.count()*9
+        return whiteMaterial - blackMaterial
+    
+    def eval(self, depth):
+        if depth == 0:
+            return self.evalMaterial()
+        
+        moves = self.generateMoves()
+
+        if len(moves) == 0:
+            return self.getResult()*1000
+        
+        bestEval = None
+        for move in moves:
+            nextPos = self.copy()
+            nextPos.applyMove(move)
+            eval = nextPos.eval(depth-1)
+            if self.toPlay == Colour.BLACK and (bestEval == None or eval < bestEval):
+                bestEval = eval
+            if self.toPlay == Colour.WHITE and (bestEval == None or eval > bestEval):
+                bestEval = eval
+        return bestEval
+    
+    def gameOver(self):
+        if self.halfMoveClock >= 100:
+            return True
+        if len(self.generateMoves()) == 0:
+            return True
+        if self.whitePawns.any() or self.whiteRooks.any() or self.whiteQueens.any() or self.blackPawns.any() or self.blackRooks.any() or self.blackQueens.any():
+            return False
+        if self.whiteBishops.count() >= 2 or (self.whiteBishops.count() == 1 and self.whiteKnights.count() == 1):
+            return False
+        if self.blackBishops.count() >= 2 or (self.blackBishops.count() == 1 and self.blackKnights.count() == 1):
+            return False
+        return True
+
+    def getResult(self):
+        if len(self.generateMoves()) == 0 and self.inCheck():
+            if self.toPlay == Colour.WHITE:
+                return -1
+            else:
+                return 1
+        elif self.gameOver():
+            return 0
+        else:
+            return None
+        
+    def inCheck(self):
+        flag = False
+        pos = self.copy()
+        pos.toPlay = Colour.opposite(pos.toPlay)
+        moves = pos.generatePseudoLegalMoves()
+        for move in moves: 
+            nextPos = pos.copy()
+            nextPos.applyMove(move)
+            if not nextPos.blackKing.any() or not nextPos.whiteKing.any():
+                flag = True
+        return flag
+
     def copy(self):
         return Board(orig=self)
     
@@ -847,6 +914,23 @@ class Board:
             if not flag:
                 legalMoves.append(move)
         return legalMoves
+
+    def perft(self, depth):
+        moves = self.generateMoves()
+        if len(moves) == 0 or depth == 0:
+            return 1
+        
+        if depth == 1:
+            return len(moves)
+        
+        nodes = 0
+        
+        for move in moves:
+            nextPos = self.copy()
+            nextPos.applyMove(move)
+            nodes += nextPos.perft(depth-1)
+        
+        return nodes
 
 def posToIndex(position: str) -> int:
     if len(position) != 2:
@@ -922,17 +1006,17 @@ def bitMaskString(bits):
     return result
 
 def main():
-    board = Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+    board = Board('6k1/6p1/6p1/6K1/8/r3p3/8/8 b - - 1 40')
     print(board.getString())
-    moves = board.generateMoves()
-    while len(moves) > 0:
-        selected = random.choice(moves)
-        # for move in moves:
-        #     if move[2] in range(8,16):
-        #         selected = move
-        board.applyMove(selected)
-        print(board.getString())
-        moves = board.generateMoves()
+    print(board.eval(5))
+    # while len(moves) > 0:
+    #     selected = random.choice(moves)
+    #     # for move in moves:
+    #     #     if move[2] in range(8,16):
+    #     #         selected = move
+    #     board.applyMove(selected)
+    #     print(board.getString())
+    #     moves = board.generateMoves()
 
 if __name__ == "__main__":
     main()
