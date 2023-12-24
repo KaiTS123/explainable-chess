@@ -273,6 +273,7 @@ class Board:
             moves.extend(self.generatePseudoLegalRookMoves(i))
             moves.extend(self.generatePseudoLegalBishopMoves(i))
             moves.extend(self.generatePseudoLegalQueenMoves(i))
+        moves.sort(key=lambda move: move[2], reverse=True)
         return moves
     
     def generatePseudoLegalRookMoves(self, position) -> list[tuple[int,int,int]]:
@@ -839,25 +840,78 @@ class Board:
         blackMaterial = self.blackPawns.count() + self.blackBishops.count()*3 + self.blackKnights.count()*3 + self.blackRooks.count()*5 + self.blackQueens.count()*9
         return whiteMaterial - blackMaterial
     
-    def eval(self, depth):
+    def heuristicEval(self):
+        if self.gameOver():
+            return self.getResult()*1000
+        return self.evalMaterial()
+    
+    def eval(self, depth, alpha=-float('inf'), beta=float('inf')):
         if depth == 0:
-            return self.evalMaterial()
+            return self.quiescenceEval(10, alpha, beta)
         
         moves = self.generateMoves()
 
         if len(moves) == 0:
-            return self.getResult()*1000
+            return self.heuristicEval()
         
-        bestEval = None
-        for move in moves:
-            nextPos = self.copy()
-            nextPos.applyMove(move)
-            eval = nextPos.eval(depth-1)
-            if self.toPlay == Colour.BLACK and (bestEval == None or eval < bestEval):
-                bestEval = eval
-            if self.toPlay == Colour.WHITE and (bestEval == None or eval > bestEval):
-                bestEval = eval
-        return bestEval
+        if self.toPlay == Colour.WHITE:
+            value = -float('inf')
+            for move in moves:
+                nextPos = self.copy()
+                nextPos.applyMove(move)
+                value = max(value, nextPos.eval(depth-1, alpha, beta))
+                if value > beta:
+                    break
+                alpha = max(alpha, value)
+            return value
+        else:
+            value = float('inf')
+            for move in moves:
+                nextPos = self.copy()
+                nextPos.applyMove(move)
+                value = min(value, nextPos.eval(depth-1, alpha, beta))
+                if value < alpha:
+                    break
+                beta = min(beta, value)
+            return value
+        
+    def quiescenceEval(self, depth, alpha=-float('inf'), beta=float('inf')):
+        loudMoves = self.generateQuiescenceMoves()
+
+        if depth == 0 or len(loudMoves) == 0:
+            return self.heuristicEval()
+        
+        
+        if self.toPlay == Colour.WHITE:
+            stand_pat = self.heuristicEval()
+            if stand_pat >= beta:
+                return beta
+            if alpha < stand_pat:
+                alpha = stand_pat
+
+            for move in loudMoves:
+                nextPos = self.copy()
+                nextPos.applyMove(move)
+                score = nextPos.quiescenceEval(depth-1, alpha, beta)
+                if score >= beta:
+                    return beta
+                alpha = max(score, alpha)
+            return alpha
+        else:
+            stand_pat = self.heuristicEval()
+            if stand_pat <= alpha:
+                return alpha
+            if beta > stand_pat:
+                beta = stand_pat
+                
+            for move in loudMoves:
+                nextPos = self.copy()
+                nextPos.applyMove(move)
+                score = nextPos.quiescenceEval(depth-1, alpha, beta)
+                if score <= alpha:
+                    return alpha
+                beta = min(score, beta)
+            return beta
     
     def gameOver(self):
         if self.halfMoveClock >= 100:
@@ -901,20 +955,67 @@ class Board:
     def generateMoves(self) -> list[tuple[int, int, int]]:
         moves = self.generatePseudoLegalMoves()
         legalMoves = []
-        for move in moves:
-            flag = False
-            nextPos = self.copy()
-            nextPos.applyMove(move)
-            nextMoves = nextPos.generatePseudoLegalMoves()
-            for nextMove in nextMoves: 
-                nextNextPos = nextPos.copy()
-                nextNextPos.applyMove(nextMove)
-                if not nextNextPos.blackKing.any() or not nextNextPos.whiteKing.any():
-                    flag = True
-            if not flag:
-                legalMoves.append(move)
+        if self.inCheck():
+            for move in moves:
+                if move[2] not in [2,3] and self.validMove(move):
+                    legalMoves.append(move)
+        else:
+            if self.toPlay == Colour.WHITE:
+                kingPos = self.whiteKing.index(1)
+                kingDiagonal = diagonalMask(kingPos)
+                kingAntiDiagonal = antiDiagonalMask(kingPos)
+                kingRank = rankMask(kingPos)
+                kingFile = fileMask(kingPos)
+                for move in moves:
+                    if move[2] == 5 or move[0] == kingPos:
+                        if self.validMove(move):
+                            legalMoves.append(move)
+                    elif not ((kingDiagonal[move[0]] and (kingDiagonal & (self.blackBishops | self.blackQueens)).any() and not kingDiagonal[move[1]]) 
+                              or (kingAntiDiagonal[move[0]] and (kingAntiDiagonal & (self.blackBishops | self.blackQueens)).any() and not kingAntiDiagonal[move[1]]) 
+                              or (kingRank[move[0]] and (kingRank & (self.blackRooks | self.blackQueens)).any() and not kingRank[move[1]])
+                              or (kingFile[move[0]] and (kingFile & (self.blackRooks | self.blackQueens)).any() and not kingFile[move[1]])):
+                        legalMoves.append(move)
+                    elif self.validMove(move):
+                        legalMoves.append(move)
+            else:
+                kingPos = self.blackKing.index(1)
+                kingDiagonal = diagonalMask(kingPos) | self.blackKing
+                kingAntiDiagonal = antiDiagonalMask(kingPos) | self.blackKing
+                kingRank = rankMask(kingPos) | self.blackKing
+                kingFile = fileMask(kingPos) | self.blackKing
+                for move in moves:
+                    if move[2] == 5 or move[0] == kingPos:
+                        if self.validMove(move):
+                            legalMoves.append(move)
+                    elif not ((kingDiagonal[move[0]] and (kingDiagonal & (self.whiteBishops | self.whiteQueens)).any() and not kingDiagonal[move[1]]) 
+                              or (kingAntiDiagonal[move[0]] and (kingAntiDiagonal & (self.whiteBishops | self.whiteQueens)).any() and not kingAntiDiagonal[move[1]]) 
+                              or (kingRank[move[0]] and (kingRank & (self.whiteRooks | self.whiteQueens)).any() and not kingRank[move[1]])
+                              or (kingFile[move[0]] and (kingFile & (self.whiteRooks | self.whiteQueens)).any() and not kingFile[move[1]])):
+                        legalMoves.append(move)
+                    elif self.validMove(move):
+                        legalMoves.append(move)
         return legalMoves
-
+    
+    def generateQuiescenceMoves(self) -> list[tuple[int, int, int]]:
+        moves = self.generateMoves()
+        loudMoves = []
+        for move in moves:
+            if move[2] >= 4:
+                loudMoves.append(move)
+        return loudMoves
+    
+    def validMove(self, move):
+        flag = True
+        nextPos = self.copy()
+        nextPos.applyMove(move)
+        nextMoves = nextPos.generatePseudoLegalMoves()
+        for nextMove in nextMoves: 
+            nextNextPos = nextPos.copy()
+            nextNextPos.applyMove(nextMove)
+            if not nextNextPos.blackKing.any() or not nextNextPos.whiteKing.any():
+                flag = False
+        return flag
+            
     def perft(self, depth):
         moves = self.generateMoves()
         if len(moves) == 0 or depth == 0:
@@ -931,6 +1032,31 @@ class Board:
             nodes += nextPos.perft(depth-1)
         
         return nodes
+
+    def playGame(self, eval_depth=3):
+        while not self.gameOver():
+            moves = self.generateMoves()
+            bestMove = moves[0]
+            nextPos = self.copy()
+            nextPos.applyMove(bestMove)
+            bestEval = nextPos.eval(eval_depth)
+            for move in moves[1:]:
+                nextPos = self.copy()
+                nextPos.applyMove(move)
+                if self.toPlay == Colour.WHITE:
+                    eval = nextPos.eval(eval_depth)
+                    if eval > bestEval:
+                        bestEval = eval
+                        bestMove = move
+                else:
+                    eval = nextPos.eval(eval_depth)
+                    if eval < bestEval:
+                        bestEval = eval
+                        bestMove = move
+            self.applyMove(bestMove)
+            print(self.getString())
+            print(bestEval)
+        print(self.getResult())
 
 def posToIndex(position: str) -> int:
     if len(position) != 2:
@@ -1006,17 +1132,9 @@ def bitMaskString(bits):
     return result
 
 def main():
-    board = Board('6k1/6p1/6p1/6K1/8/r3p3/8/8 b - - 1 40')
+    board = Board('8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0')
     print(board.getString())
-    print(board.eval(5))
-    # while len(moves) > 0:
-    #     selected = random.choice(moves)
-    #     # for move in moves:
-    #     #     if move[2] in range(8,16):
-    #     #         selected = move
-    #     board.applyMove(selected)
-    #     print(board.getString())
-    #     moves = board.generateMoves()
+    print(board.perft(4))
 
 if __name__ == "__main__":
     main()
