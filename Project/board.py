@@ -13,6 +13,14 @@ class Colour(Enum):
             return Colour.WHITE
         else:
             return Colour.BLACK
+        
+class Piece(Enum):
+    PAWN = 1
+    BISHOP = 2
+    KNIGHT = 3
+    ROOK = 4
+    QUEEN = 5
+    KING = 6
 
 class Board:
     def __init__(self, FEN=None, orig=None) -> None:
@@ -105,6 +113,12 @@ class Board:
             # Number of halfmoves since last capture or pawn advance (for fifty-move rule)
             self.halfMoveClock = int(fields[4])
 
+            # Previous states for unmake move
+            self.prevHalfMoveClock = []
+            self.prevCapture = []
+            self.prevCastlingRights = []
+            self.prevEPs = []
+
             # Number of full moves (starts at 1 and increments after blacks move)
             self.fullMoves = int(fields[5])
         elif orig:
@@ -127,9 +141,13 @@ class Board:
             self.pieces = self.blackPieces | self.whitePieces
 
             self.toPlay = orig.toPlay
-            self.castlingRights = copy.copy(orig.castlingRights)
-            self.enPassant = copy.copy(orig.enPassant)
+            self.castlingRights = orig.castlingRights
+            self.enPassant = orig.enPassant
             self.halfMoveClock = orig.halfMoveClock
+            self.prevHalfMoveClock = orig.prevHalfMoveClock
+            self.prevCapture = orig.prevCapture
+            self.prevCastlingRights = orig.prevCastlingRights
+            self.prevEPs = orig.prevEPs
             self.fullMoves = orig.fullMoves
 
     def getString(self):
@@ -681,11 +699,13 @@ class Board:
         if self.toPlay == Colour.WHITE:
             self.toPlay = Colour.BLACK
             if self.whitePawns[startPos]:
+                self.prevHalfMoveClock.append(self.halfMoveClock-1)
                 self.halfMoveClock = 0
                 self.whitePawns[startPos] = False
                 
                 if code == 5:
                     self.blackPawns[endPos-8] = False
+                    self.prevCapture.append(Piece.PAWN)
 
                 if code == 8 or code == 12:
                     self.whiteKnights[endPos] = True
@@ -710,8 +730,10 @@ class Board:
                 self.whiteRooks[startPos] = False
                 self.whiteRooks[endPos] = True
                 if startPos == 0:
+                    self.prevCastlingRights.append(self.castlingRights)
                     self.castlingRights.discard('Q')
                 if startPos == 7:
+                    self.prevCastlingRights.append(self.castlingRights)
                     self.castlingRights.discard('K')
 
             elif self.whiteQueens[startPos]:
@@ -719,6 +741,7 @@ class Board:
                 self.whiteQueens[endPos] = True
 
             elif self.whiteKing[startPos]:
+                self.prevCastlingRights.append(self.castlingRights)
                 self.castlingRights.discard('K')
                 self.castlingRights.discard('Q')
                 self.whiteKing[startPos] = False
@@ -730,39 +753,51 @@ class Board:
                     self.whiteRooks[0] = False
                     self.whiteRooks[3] = True
             
+            self.prevEPs.append(self.enPassant)
             if code == 1:
                 self.enPassant = indexToPos(startPos+8)
             else:
                 self.enPassant = ''
 
             if code in [4, 12, 13, 14, 15]:
+                self.prevHalfMoveClock.append(self.halfMoveClock-1)
                 self.halfMoveClock = 0
                 if self.blackBishops[endPos]:
                     self.blackBishops[endPos] = False
+                    self.prevCapture.append(Piece.BISHOP)
                 elif self.blackKing[endPos]:
                     self.blackKing[endPos] = False
+                    self.prevCapture.append(Piece.KING)
                 elif self.blackKnights[endPos]:
                     self.blackKnights[endPos] = False
+                    self.prevCapture.append(Piece.KNIGHT)
                 elif self.blackPawns[endPos]:
                     self.blackPawns[endPos] = False
+                    self.prevCapture.append(Piece.PAWN)
                 elif self.blackRooks[endPos]:
                     self.blackRooks[endPos] = False
+                    self.prevCapture.append(Piece.ROOK)
                     if endPos == 56:
+                        self.prevCastlingRights.append(self.castlingRights)
                         self.castlingRights.discard('q')
                     elif endPos == 63:
+                        self.prevCastlingRights.append(self.castlingRights)
                         self.castlingRights.discard('k')
                 elif self.blackQueens[endPos]:
                     self.blackQueens[endPos] = False
+                    self.prevCapture.append(Piece.QUEEN)
 
         elif self.toPlay == Colour.BLACK:
             self.toPlay = Colour.WHITE
             self.fullMoves += 1
             if self.blackPawns[startPos]:
+                self.prevHalfMoveClock.append(self.halfMoveClock-1)
                 self.halfMoveClock = 0
                 self.blackPawns[startPos] = False
                 
                 if code == 5:
                     self.whitePawns[endPos+8] = False
+                    self.prevCapture.append(Piece.PAWN)
 
                 if code == 8 or code == 12:
                     self.blackKnights[endPos] = True
@@ -787,8 +822,10 @@ class Board:
                 self.blackRooks[startPos] = False
                 self.blackRooks[endPos] = True
                 if startPos == 56:
+                    self.prevCastlingRights.append(self.castlingRights)
                     self.castlingRights.discard('q')
                 if startPos == 63:
+                    self.prevCastlingRights.append(self.castlingRights)
                     self.castlingRights.discard('k')
 
             elif self.blackQueens[startPos]:
@@ -796,6 +833,7 @@ class Board:
                 self.blackQueens[endPos] = True
 
             elif self.blackKing[startPos]:
+                self.prevCastlingRights.append(self.castlingRights)
                 self.castlingRights.discard('k')
                 self.castlingRights.discard('q')
                 self.blackKing[startPos] = False
@@ -807,29 +845,187 @@ class Board:
                     self.blackRooks[56] = False
                     self.blackRooks[59] = True
             
+            self.prevEPs.append(self.enPassant)
             if code == 1:
                 self.enPassant = indexToPos(startPos-8)
             else:
                 self.enPassant = ''
 
             if code in [4, 12, 13, 14, 15]:
+                self.prevHalfMoveClock.append(self.halfMoveClock-1)
                 self.halfMoveClock = 0
                 if self.whiteBishops[endPos]:
                     self.whiteBishops[endPos] = False
+                    self.prevCapture.append(Piece.BISHOP)
                 elif self.whiteKing[endPos]:
                     self.whiteKing[endPos] = False
+                    self.prevCapture.append(Piece.KING)
                 elif self.whiteKnights[endPos]:
                     self.whiteKnights[endPos] = False
+                    self.prevCapture.append(Piece.KNIGHT)
                 elif self.whitePawns[endPos]:
                     self.whitePawns[endPos] = False
+                    self.prevCapture.append(Piece.PAWN)
                 elif self.whiteRooks[endPos]:
                     self.whiteRooks[endPos] = False
+                    self.prevCapture.append(Piece.ROOK)
                     if endPos == 0:
+                        self.prevCastlingRights.append(self.castlingRights)
                         self.castlingRights.discard('Q')
                     elif endPos == 7:
+                        self.prevCastlingRights.append(self.castlingRights)
                         self.castlingRights.discard('K')
                 elif self.whiteQueens[endPos]:
-                    self.whiteQueens[endPos] = False            
+                    self.whiteQueens[endPos] = False
+                    self.prevCapture.append(Piece.QUEEN)       
+
+        self.whitePieces = self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens | self.whiteKing
+        self.blackPieces = self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks | self.blackQueens | self.blackKing
+        self.pieces = self.blackPieces | self.whitePieces
+
+    def unmake(self, move):
+        (startPos, endPos, code) = move
+        self.halfMoveClock -= 1
+        if self.toPlay == Colour.BLACK:
+            self.toPlay = Colour.WHITE
+            if self.whitePawns[endPos] or code in range(8,16):
+                self.halfMoveClock = self.prevHalfMoveClock.pop()
+                self.whitePawns[startPos] = True
+                
+                if code == 5:
+                    self.blackPawns[endPos-8] = True
+                    self.prevCapture.pop()
+
+                if code == 8 or code == 12:
+                    self.whiteKnights[endPos] = False
+                elif code == 9 or code == 13:
+                    self.whiteBishops[endPos] = False
+                elif code == 10 or code == 14:
+                    self.whiteRooks[endPos] = False
+                elif code == 11 or code == 15:
+                    self.whiteQueens[endPos] = False
+                else:
+                    self.whitePawns[endPos] = False
+
+            elif self.whiteKnights[endPos]:
+                self.whiteKnights[startPos] = True
+                self.whiteKnights[endPos] = False
+
+            elif self.whiteBishops[endPos]:
+                self.whiteBishops[startPos] = True
+                self.whiteBishops[endPos] = False
+
+            elif self.whiteRooks[endPos]:
+                self.whiteRooks[startPos] = True
+                self.whiteRooks[endPos] = False
+                if startPos == 0 or startPos == 7:
+                    self.castlingRights = self.prevCastlingRights.pop()
+
+            elif self.whiteQueens[endPos]:
+                self.whiteQueens[startPos] = True
+                self.whiteQueens[endPos] = False
+
+            elif self.whiteKing[endPos]:
+                self.castlingRights = self.prevCastlingRights.pop()
+                self.whiteKing[startPos] = True
+                self.whiteKing[endPos] = False
+                if code == 2:
+                    self.whiteRooks[7] = True
+                    self.whiteRooks[5] = False
+                elif code == 3:
+                    self.whiteRooks[0] = True
+                    self.whiteRooks[3] = False
+            
+            self.enPassant = self.prevEPs.pop()
+
+            if code in [4, 12, 13, 14, 15]:
+                self.halfMoveClock = self.prevHalfMoveClock.pop()
+                prevCapture = self.prevCapture.pop()
+                if prevCapture == Piece.BISHOP:
+                    self.blackBishops[endPos] = True
+                elif prevCapture == Piece.KING:
+                    self.blackKing[endPos] = True
+                elif prevCapture == Piece.KNIGHT:
+                    self.blackKnights[endPos] = True
+                elif prevCapture == Piece.PAWN:
+                    self.blackPawns[endPos] = True
+                elif prevCapture == Piece.ROOK:
+                    self.blackRooks[endPos] = True
+                    if endPos == 56 or endPos == 63:
+                        self.castlingRights = self.prevCastlingRights.pop()
+                elif prevCapture == Piece.QUEEN:
+                    self.blackQueens[endPos] = True
+
+        elif self.toPlay == Colour.WHITE:
+            self.toPlay = Colour.BLACK
+            self.fullMoves -= 1
+            if self.blackPawns[endPos] or code in range(8,16):
+                self.halfMoveClock = self.prevHalfMoveClock.pop()
+                self.blackPawns[startPos] = True
+                
+                if code == 5:
+                    self.whitePawns[endPos+8] = True
+                    self.prevCapture.pop()
+
+                if code == 8 or code == 12:
+                    self.blackKnights[endPos] = False
+                elif code == 9 or code == 13:
+                    self.blackBishops[endPos] = False
+                elif code == 10 or code == 14:
+                    self.blackRooks[endPos] = False
+                elif code == 11 or code == 15:
+                    self.blackQueens[endPos] = False
+                else:
+                    self.blackPawns[endPos] = False
+
+            elif self.blackKnights[endPos]:
+                self.blackKnights[startPos] = True
+                self.blackKnights[endPos] = False
+
+            elif self.blackBishops[endPos]:
+                self.blackBishops[startPos] = True
+                self.blackBishops[endPos] = False
+
+            elif self.blackRooks[endPos]:
+                self.blackRooks[startPos] = True
+                self.blackRooks[endPos] = False
+                if startPos == 56 or startPos == 63:
+                    self.castlingRights = self.prevCastlingRights.pop()
+
+            elif self.blackQueens[endPos]:
+                self.blackQueens[startPos] = True
+                self.blackQueens[endPos] = False
+
+            elif self.blackKing[endPos]:
+                self.castlingRights = self.prevCastlingRights.pop()
+                self.blackKing[startPos] = True
+                self.blackKing[endPos] = False
+                if code == 2:
+                    self.blackRooks[7] = True
+                    self.blackRooks[5] = False
+                elif code == 3:
+                    self.blackRooks[0] = True
+                    self.blackRooks[3] = False
+            
+            self.enPassant = self.prevEPs.pop()
+
+            if code in [4, 12, 13, 14, 15]:
+                self.halfMoveClock = self.prevHalfMoveClock.pop()
+                prevCapture = self.prevCapture.pop()
+                if prevCapture == Piece.BISHOP:
+                    self.whiteBishops[endPos] = True
+                elif prevCapture == Piece.KING:
+                    self.whiteKing[endPos] = True
+                elif prevCapture == Piece.KNIGHT:
+                    self.whiteKnights[endPos] = True
+                elif prevCapture == Piece.PAWN:
+                    self.whitePawns[endPos] = True
+                elif prevCapture == Piece.ROOK:
+                    self.whiteRooks[endPos] = True
+                    if endPos == 0 or endPos == 7:
+                        self.castlingRights = self.prevCastlingRights.pop()
+                elif prevCapture == Piece.QUEEN:
+                    self.whiteQueens[endPos] = True    
 
         self.whitePieces = self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens | self.whiteKing
         self.blackPieces = self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks | self.blackQueens | self.blackKing
@@ -847,7 +1043,7 @@ class Board:
     
     def eval(self, depth, alpha=-float('inf'), beta=float('inf')):
         if depth == 0:
-            return self.quiescenceEval(10, alpha, beta)
+            return self.quiescenceEval(100, alpha, beta)
         
         moves = self.generateMoves()
 
@@ -857,9 +1053,9 @@ class Board:
         if self.toPlay == Colour.WHITE:
             value = -float('inf')
             for move in moves:
-                nextPos = self.copy()
-                nextPos.applyMove(move)
-                value = max(value, nextPos.eval(depth-1, alpha, beta))
+                self.applyMove(move)
+                value = max(value, self.eval(depth-1, alpha, beta))
+                self.unmake(move)
                 if value > beta:
                     break
                 alpha = max(alpha, value)
@@ -867,9 +1063,9 @@ class Board:
         else:
             value = float('inf')
             for move in moves:
-                nextPos = self.copy()
-                nextPos.applyMove(move)
-                value = min(value, nextPos.eval(depth-1, alpha, beta))
+                self.applyMove(move)
+                value = min(value, self.eval(depth-1, alpha, beta))
+                self.unmake(move)
                 if value < alpha:
                     break
                 beta = min(beta, value)
@@ -890,9 +1086,9 @@ class Board:
                 alpha = stand_pat
 
             for move in loudMoves:
-                nextPos = self.copy()
-                nextPos.applyMove(move)
-                score = nextPos.quiescenceEval(depth-1, alpha, beta)
+                self.applyMove(move)
+                score = self.quiescenceEval(depth-1, alpha, beta)
+                self.unmake(move)
                 if score >= beta:
                     return beta
                 alpha = max(score, alpha)
@@ -905,9 +1101,9 @@ class Board:
                 beta = stand_pat
                 
             for move in loudMoves:
-                nextPos = self.copy()
-                nextPos.applyMove(move)
-                score = nextPos.quiescenceEval(depth-1, alpha, beta)
+                self.applyMove(move)
+                score = self.quiescenceEval(depth-1, alpha, beta)
+                self.unmake(move)
                 if score <= alpha:
                     return alpha
                 beta = min(score, beta)
@@ -939,14 +1135,14 @@ class Board:
         
     def inCheck(self):
         flag = False
-        pos = self.copy()
-        pos.toPlay = Colour.opposite(pos.toPlay)
-        moves = pos.generatePseudoLegalMoves()
+        self.toPlay = Colour.opposite(self.toPlay)
+        moves = self.generatePseudoLegalMoves()
         for move in moves: 
-            nextPos = pos.copy()
-            nextPos.applyMove(move)
-            if not nextPos.blackKing.any() or not nextPos.whiteKing.any():
+            self.applyMove(move)
+            if not self.blackKing.any() or not self.whiteKing.any():
                 flag = True
+            self.unmake(move)
+        self.toPlay = Colour.opposite(self.toPlay)
         return flag
 
     def copy(self):
@@ -1006,14 +1202,14 @@ class Board:
     
     def validMove(self, move):
         flag = True
-        nextPos = self.copy()
-        nextPos.applyMove(move)
-        nextMoves = nextPos.generatePseudoLegalMoves()
+        self.applyMove(move)
+        nextMoves = self.generatePseudoLegalMoves()
         for nextMove in nextMoves: 
-            nextNextPos = nextPos.copy()
-            nextNextPos.applyMove(nextMove)
-            if not nextNextPos.blackKing.any() or not nextNextPos.whiteKing.any():
+            self.applyMove(nextMove)
+            if not self.blackKing.any() or not self.whiteKing.any():
                 flag = False
+            self.unmake(nextMove)
+        self.unmake(move)
         return flag
             
     def perft(self, depth):
@@ -1027,9 +1223,9 @@ class Board:
         nodes = 0
         
         for move in moves:
-            nextPos = self.copy()
-            nextPos.applyMove(move)
-            nodes += nextPos.perft(depth-1)
+            self.applyMove(move)
+            nodes += self.perft(depth-1)
+            self.unmake(move)
         
         return nodes
 
@@ -1037,22 +1233,21 @@ class Board:
         while not self.gameOver():
             moves = self.generateMoves()
             bestMove = moves[0]
-            nextPos = self.copy()
-            nextPos.applyMove(bestMove)
-            bestEval = nextPos.eval(eval_depth)
+            self.applyMove(bestMove)
+            bestEval = self.eval(eval_depth)
+            self.unmake(bestMove)
             for move in moves[1:]:
-                nextPos = self.copy()
-                nextPos.applyMove(move)
-                if self.toPlay == Colour.WHITE:
-                    eval = nextPos.eval(eval_depth)
+                self.applyMove(move)
+                eval = self.eval(eval_depth)
+                if self.toPlay == Colour.BLACK:
                     if eval > bestEval:
                         bestEval = eval
                         bestMove = move
                 else:
-                    eval = nextPos.eval(eval_depth)
                     if eval < bestEval:
                         bestEval = eval
                         bestMove = move
+                self.unmake(move)
             self.applyMove(bestMove)
             print(self.getString())
             print(bestEval)
@@ -1134,7 +1329,7 @@ def bitMaskString(bits):
 def main():
     board = Board('8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0')
     print(board.getString())
-    print(board.perft(4))
+    print(board.playGame(1))
 
 if __name__ == "__main__":
     main()
