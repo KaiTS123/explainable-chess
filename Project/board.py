@@ -22,6 +22,14 @@ class Piece(Enum):
     QUEEN = 5
     KING = 6
 
+class TTEntry():
+    def __init__(self, depth, value, type, age):
+        self.depth = depth
+        self.value = value
+        self.type = type
+        self.age = age
+
+
 class Board:
     def __init__(self, FEN=None, orig=None) -> None:
         if not orig and not FEN:
@@ -121,6 +129,10 @@ class Board:
 
             # Number of full moves (starts at 1 and increments after blacks move)
             self.fullMoves = int(fields[5])
+
+            # Transposition table with positions and their evaluations
+            self.transpositionTable = {}
+
         elif orig:
             self.whitePawns = copy.copy(orig.whitePawns)
             self.whiteKnights = copy.copy(orig.whiteKnights)
@@ -149,6 +161,7 @@ class Board:
             self.prevCastlingRights = orig.prevCastlingRights
             self.prevEPs = orig.prevEPs
             self.fullMoves = orig.fullMoves
+            self.transpositionTable = copy.copy(orig.transpositionTable)
 
     def getString(self):
         result = ''
@@ -1001,11 +1014,11 @@ class Board:
                 self.blackKing[startPos] = True
                 self.blackKing[endPos] = False
                 if code == 2:
-                    self.blackRooks[7] = True
-                    self.blackRooks[5] = False
+                    self.blackRooks[63] = True
+                    self.blackRooks[61] = False
                 elif code == 3:
-                    self.blackRooks[0] = True
-                    self.blackRooks[3] = False
+                    self.blackRooks[56] = True
+                    self.blackRooks[59] = False
             
             self.enPassant = self.prevEPs.pop()
 
@@ -1041,73 +1054,158 @@ class Board:
             return self.getResult()*1000
         return self.evalMaterial()
     
+    def generateTTKey(self):
+        return self.getFENString()
+    
+    def age(self):
+        if self.toPlay == Colour.WHITE:
+            return 2*self.fullMoves
+        return 2*self.fullMoves+1
+
+    def orderMoves(self, moves):
+        reversed = False
+        if self.toPlay == Colour.WHITE:
+            reversed = True
+        evaluatedPositions = []
+        boundedPositions = []
+        unknownPositions = []
+        for move in moves:
+            self.applyMove(move)
+            key = self.generateTTKey()
+            self.unmake(move)
+            if key in self.transpositionTable:
+                transpositionEntry = self.transpositionTable[key]
+                if transpositionEntry.type == 1:
+                    evaluatedPositions.append((move, transpositionEntry.value))
+                else:
+                    boundedPositions.append((move, transpositionEntry.value))
+            else:
+                unknownPositions.append(move)
+        evaluatedPositions.sort(key=lambda move: move[1], reverse=reversed)
+        boundedPositions.sort(key=lambda move: move[1], reverse=reversed)
+        return [item[0] for item in evaluatedPositions]+[item[0] for item in boundedPositions]+unknownPositions
+
     def eval(self, depth, alpha=-float('inf'), beta=float('inf')):
+        key = self.generateTTKey()
+        transpositionEntry = None
+        if key in self.transpositionTable:
+            transpositionEntry = self.transpositionTable[key]
+            if transpositionEntry.type == 1 and transpositionEntry.depth >= depth:
+                return transpositionEntry.value
+
         if depth == 0:
-            return self.quiescenceEval(100, alpha, beta)
+            value = self.quiescenceEval(20, alpha, beta)
+            newEntry = TTEntry(0, value, 1, self.age())
+            self.transpositionTable[key] = newEntry
+            return value
         
         moves = self.generateMoves()
+        moves = self.orderMoves(moves)
 
         if len(moves) == 0:
-            return self.heuristicEval()
+            value = self.heuristicEval()
+            newEntry = TTEntry(0, value, 1, self.age())
+            self.transpositionTable[key] = newEntry
+            return value
         
         if self.toPlay == Colour.WHITE:
             value = -float('inf')
+            beatAlpha = False
             for move in moves:
                 self.applyMove(move)
                 value = max(value, self.eval(depth-1, alpha, beta))
                 self.unmake(move)
                 if value > beta:
-                    break
-                alpha = max(alpha, value)
+                    newEntry = TTEntry(depth, value, 2, self.age())
+                    self.transpositionTable[key] = newEntry
+                    return value
+                if value > alpha:
+                    alpha = value
+                    beatAlpha = True
+            if beatAlpha:
+                newEntry = TTEntry(depth, value, 1, self.age())
+            else:
+                newEntry = TTEntry(depth, value, 3, self.age())
+            self.transpositionTable[key] = newEntry
             return value
         else:
             value = float('inf')
+            beatBeta = False
             for move in moves:
                 self.applyMove(move)
                 value = min(value, self.eval(depth-1, alpha, beta))
                 self.unmake(move)
                 if value < alpha:
-                    break
-                beta = min(beta, value)
+                    newEntry = TTEntry(depth, value, 3, self.age())
+                    self.transpositionTable[key] = newEntry
+                    return value
+                if value < beta:
+                    beta = value
+                    beatBeta = True
+            if beatBeta:
+                newEntry = TTEntry(depth, value, 1, self.age())
+            else:
+                newEntry = TTEntry(depth, value, 2, self.age())
+            self.transpositionTable[key] = newEntry
             return value
         
     def quiescenceEval(self, depth, alpha=-float('inf'), beta=float('inf')):
-        loudMoves = self.generateQuiescenceMoves()
+        moves = self.generateQuiescenceMoves()
+        moves = self.orderMoves(moves)
 
-        if depth == 0 or len(loudMoves) == 0:
-            return self.heuristicEval()
-        
+        key = self.generateTTKey()
+        transpositionEntry = None
+        if key in self.transpositionTable:
+            transpositionEntry = self.transpositionTable[key]
+            if transpositionEntry.type == 1 and transpositionEntry.depth >= depth:
+                return transpositionEntry.value
+
+        if depth == 0 or len(moves) == 0:
+            value = self.heuristicEval()
+            newEntry = TTEntry(0, value, 1, self.age())
+            self.transpositionTable[key] = newEntry
+            return value
         
         if self.toPlay == Colour.WHITE:
-            stand_pat = self.heuristicEval()
-            if stand_pat >= beta:
-                return beta
-            if alpha < stand_pat:
-                alpha = stand_pat
-
-            for move in loudMoves:
+            value = self.heuristicEval()
+            beatAlpha = False
+            for move in moves:
                 self.applyMove(move)
-                score = self.quiescenceEval(depth-1, alpha, beta)
+                value = max(value, self.quiescenceEval(depth-1, alpha, beta))
                 self.unmake(move)
-                if score >= beta:
-                    return beta
-                alpha = max(score, alpha)
-            return alpha
+                if value >= beta:
+                    newEntry = TTEntry(depth, value, 2, self.age())
+                    self.transpositionTable[key] = newEntry
+                    return value
+                if value > alpha:
+                    alpha = value
+                    beatAlpha = True
+            if beatAlpha:
+                newEntry = TTEntry(depth, value, 1, self.age())
+            else:
+                newEntry = TTEntry(depth, value, 3, self.age())
+            self.transpositionTable[key] = newEntry
+            return value
         else:
-            stand_pat = self.heuristicEval()
-            if stand_pat <= alpha:
-                return alpha
-            if beta > stand_pat:
-                beta = stand_pat
-                
-            for move in loudMoves:
+            value = self.heuristicEval()
+            beatBeta = False
+            for move in moves:
                 self.applyMove(move)
-                score = self.quiescenceEval(depth-1, alpha, beta)
+                value = min(value, self.quiescenceEval(depth-1, alpha, beta))
                 self.unmake(move)
-                if score <= alpha:
-                    return alpha
-                beta = min(score, beta)
-            return beta
+                if value <= alpha:
+                    newEntry = TTEntry(depth, value, 3, self.age())
+                    self.transpositionTable[key] = newEntry
+                    return value
+                if value < beta:
+                    beta = value
+                    beatBeta = True
+            if beatBeta:
+                newEntry = TTEntry(depth, value, 1, self.age())
+            else:
+                newEntry = TTEntry(depth, value, 2, self.age())
+            self.transpositionTable[key] = newEntry
+            return value
     
     def gameOver(self):
         if self.halfMoveClock >= 100:
@@ -1229,25 +1327,40 @@ class Board:
         
         return nodes
 
-    def playGame(self, eval_depth=3):
-        while not self.gameOver():
-            moves = self.generateMoves()
+    def gcTranspositionTable(self):
+        age = self.age()
+        keys = list(self.transpositionTable.keys())
+        for key in keys:
+            if self.transpositionTable[key].age <= age:
+                self.transpositionTable.pop(key)
+
+    def bestMove(self, eval_depth=3):
+        moves = self.generateMoves()
+        for depth in range(eval_depth):
+            moves = self.orderMoves(moves)
             bestMove = moves[0]
             self.applyMove(bestMove)
-            bestEval = self.eval(eval_depth)
+            bestEval = self.eval(depth)
             self.unmake(bestMove)
             for move in moves[1:]:
                 self.applyMove(move)
-                eval = self.eval(eval_depth)
                 if self.toPlay == Colour.BLACK:
+                    eval = self.eval(depth, beta=bestEval)
                     if eval > bestEval:
                         bestEval = eval
                         bestMove = move
                 else:
+                    eval = self.eval(depth, alpha=bestEval)
                     if eval < bestEval:
                         bestEval = eval
                         bestMove = move
                 self.unmake(move)
+        return bestMove, bestEval
+
+    def playGame(self, eval_depth=3):
+        while not self.gameOver():
+            self.gcTranspositionTable()
+            bestMove, bestEval = self.bestMove(eval_depth)
             self.applyMove(bestMove)
             print(self.getString())
             print(bestEval)
@@ -1327,9 +1440,9 @@ def bitMaskString(bits):
     return result
 
 def main():
-    board = Board('8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0')
+    board = Board()
     print(board.getString())
-    print(board.playGame(1))
+    print(board.playGame(2))
 
 if __name__ == "__main__":
     main()
