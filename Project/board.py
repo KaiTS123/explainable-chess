@@ -357,259 +357,262 @@ class Board:
 
     def generatePseudoLegalMoves(self) -> list[tuple[int, int, int]]:
         moves = []
-        for i in range(64):
-            moves.extend(self.generatePseudoLegalPawnMoves(i))
-            moves.extend(self.generatePseudoLegalKnightMoves(i))
-            moves.extend(self.generatePseudoLegalKingMoves(i))
-            moves.extend(self.generatePseudoLegalRookMoves(i))
-            moves.extend(self.generatePseudoLegalBishopMoves(i))
-            moves.extend(self.generatePseudoLegalQueenMoves(i))
+        moves.extend(self.generatePseudoLegalPawnMoves())
+        moves.extend(self.generatePseudoLegalKnightMoves())
+        moves.extend(self.generatePseudoLegalKingMoves())
+        moves.extend(self.generatePseudoLegalRookMoves())
+        moves.extend(self.generatePseudoLegalBishopMoves())
+        moves.extend(self.generatePseudoLegalQueenMoves())
         moves.sort(key=lambda move: move[2], reverse=True)
         return moves
     
-    def generatePseudoLegalRookMoves(self, position) -> list[tuple[int,int,int]]:
+    def generatePseudoLegalRookMoves(self) -> list[tuple[int,int,int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whiteRooks[position]:
-            endPos = position-1
-            while endPos % 8 != 7 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 1
-            if endPos % 8 != 7 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+        for position in range(64):
+            if self.toPlay == Colour.WHITE and self.whiteRooks[position]:
+                endPos = position-1
+                while endPos % 8 != 7 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 1
+                if endPos % 8 != 7 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+1
-            while endPos % 8 != 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 1
-            if endPos % 8 != 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+1
+                while endPos % 8 != 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 1
+                if endPos % 8 != 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-8
-            while endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 8
-            if endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-8
+                while endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 8
+                if endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+8
-            while endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 8
-            if endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+8
+                while endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 8
+                if endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-        if self.toPlay == Colour.BLACK and self.blackRooks[position]:
-            endPos = position-1
-            while endPos % 8 != 7 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 1
-            if endPos % 8 != 7 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+            if self.toPlay == Colour.BLACK and self.blackRooks[position]:
+                endPos = position-1
+                while endPos % 8 != 7 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 1
+                if endPos % 8 != 7 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+1
-            while endPos % 8 != 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 1
-            if endPos % 8 != 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+1
+                while endPos % 8 != 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 1
+                if endPos % 8 != 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-8
-            while endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 8
-            if endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-8
+                while endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 8
+                if endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+8
-            while endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 8
-            if endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+8
+                while endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 8
+                if endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
         return moves
     
-    def generatePseudoLegalBishopMoves(self, position) -> list[tuple[int,int,int]]:
+    def generatePseudoLegalBishopMoves(self) -> list[tuple[int,int,int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whiteBishops[position]:
-            endPos = position-9
-            while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 9
-            if endPos % 8 != 7 and endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+        for position in range(64):
+            if self.toPlay == Colour.WHITE and self.whiteBishops[position]:
+                endPos = position-9
+                while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 9
+                if endPos % 8 != 7 and endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-7
-            while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 7
-            if endPos % 8 != 0 and endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-7
+                while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 7
+                if endPos % 8 != 0 and endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+7
-            while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 7
-            if endPos % 8 != 7 and endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+7
+                while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 7
+                if endPos % 8 != 7 and endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+9
-            while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 9
-            if endPos % 8 != 0 and endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
-            
+                endPos = position+9
+                while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 9
+                if endPos % 8 != 0 and endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
+                
 
-        if self.toPlay == Colour.BLACK and self.blackBishops[position]:
-            endPos = position-9
-            while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 9
-            if endPos % 8 != 7 and endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+            if self.toPlay == Colour.BLACK and self.blackBishops[position]:
+                endPos = position-9
+                while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 9
+                if endPos % 8 != 7 and endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-7
-            while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 7
-            if endPos % 8 != 0 and endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-7
+                while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 7
+                if endPos % 8 != 0 and endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+7
-            while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 7
-            if endPos % 8 != 7 and endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+7
+                while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 7
+                if endPos % 8 != 7 and endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+9
-            while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 9
-            if endPos % 8 != 0 and endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+9
+                while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 9
+                if endPos % 8 != 0 and endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
         return moves
     
-    def generatePseudoLegalQueenMoves(self, position) -> list[tuple[int,int,int]]:
+    def generatePseudoLegalQueenMoves(self) -> list[tuple[int,int,int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whiteQueens[position]:
-            endPos = position-9
-            while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 9
-            if endPos % 8 != 7 and endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+        for position in range(64):
+            if self.toPlay == Colour.WHITE and self.whiteQueens[position]:
+                endPos = position-9
+                while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 9
+                if endPos % 8 != 7 and endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-7
-            while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 7
-            if endPos % 8 != 0 and endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-7
+                while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 7
+                if endPos % 8 != 0 and endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+7
-            while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 7
-            if endPos % 8 != 7 and endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+7
+                while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 7
+                if endPos % 8 != 7 and endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+9
-            while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 9
-            if endPos % 8 != 0 and endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
-            
-            endPos = position-1
-            while endPos % 8 != 7 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 1
-            if endPos % 8 != 7 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+9
+                while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 9
+                if endPos % 8 != 0 and endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
+                
+                endPos = position-1
+                while endPos % 8 != 7 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 1
+                if endPos % 8 != 7 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+1
-            while endPos % 8 != 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 1
-            if endPos % 8 != 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+1
+                while endPos % 8 != 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 1
+                if endPos % 8 != 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-8
-            while endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 8
-            if endPos // 8 >= 0 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-8
+                while endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 8
+                if endPos // 8 >= 0 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+8
-            while endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 8
-            if endPos // 8 != 8 and self.blackPieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+8
+                while endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 8
+                if endPos // 8 != 8 and self.blackPieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-        if self.toPlay == Colour.BLACK and self.blackQueens[position]:
-            endPos = position-9
-            while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 9
-            if endPos % 8 != 7 and endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+            if self.toPlay == Colour.BLACK and self.blackQueens[position]:
+                endPos = position-9
+                while endPos % 8 != 7 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 9
+                if endPos % 8 != 7 and endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-7
-            while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 7
-            if endPos % 8 != 0 and endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-7
+                while endPos % 8 != 0 and endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 7
+                if endPos % 8 != 0 and endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+7
-            while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 7
-            if endPos % 8 != 7 and endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+7
+                while endPos % 8 != 7 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 7
+                if endPos % 8 != 7 and endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+9
-            while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 9
-            if endPos % 8 != 0 and endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
-            
-            endPos = position-1
-            while endPos % 8 != 7 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 1
-            if endPos % 8 != 7 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+9
+                while endPos % 8 != 0 and endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 9
+                if endPos % 8 != 0 and endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
+                
+                endPos = position-1
+                while endPos % 8 != 7 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 1
+                if endPos % 8 != 7 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+1
-            while endPos % 8 != 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 1
-            if endPos % 8 != 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+1
+                while endPos % 8 != 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 1
+                if endPos % 8 != 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position-8
-            while endPos // 8 >= 0 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos -= 8
-            if endPos // 8 >= 0 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position-8
+                while endPos // 8 >= 0 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos -= 8
+                if endPos // 8 >= 0 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
 
-            endPos = position+8
-            while endPos // 8 != 8 and not self.pieces[endPos]:
-                moves.append((position, endPos, 0))
-                endPos += 8
-            if endPos // 8 != 8 and self.whitePieces[endPos]:
-                moves.append((position, endPos, 4))
+                endPos = position+8
+                while endPos // 8 != 8 and not self.pieces[endPos]:
+                    moves.append((position, endPos, 0))
+                    endPos += 8
+                if endPos // 8 != 8 and self.whitePieces[endPos]:
+                    moves.append((position, endPos, 4))
         return moves
 
-    def generatePseudoLegalKingMoves(self, position) -> list[tuple[int, int, int]]:
+    def generatePseudoLegalKingMoves(self) -> list[tuple[int, int, int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whiteKing[position]:
+        if self.toPlay == Colour.WHITE:
+            position = self.whiteKing.index(1)
             if position // 8 < 7:
                 if position % 8 > 0 and not self.whitePieces[position+7]:
                     moves.append((position, position+7, 4*self.blackPieces[position+7]))
@@ -632,7 +635,8 @@ class Board:
                 moves.append((4, 6, 2))
             if 'Q' in self.castlingRights and not self.pieces[1:4].any():
                 moves.append((4, 2, 3))
-        elif self.toPlay == Colour.BLACK and self.blackKing[position]:
+        elif self.toPlay == Colour.BLACK:
+            position = self.blackKing.index(1)
             if position // 8 < 7:
                 if position % 8 > 0 and not self.blackPieces[position+7]:
                     moves.append((position, position+7, 4*self.whitePieces[position+7]))
@@ -658,112 +662,114 @@ class Board:
 
         return moves
 
-    def generatePseudoLegalKnightMoves(self, position) -> list[tuple[int, int, int]]:
+    def generatePseudoLegalKnightMoves(self) -> list[tuple[int, int, int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whiteKnights[position]:
-            if position // 8 < 6:
-                if position % 8 > 0 and not self.whitePieces[position+15]:
-                    moves.append((position, position+15, 4*self.blackPieces[position+15]))
-                if position % 8 < 7 and not self.whitePieces[position+17]:
-                    moves.append((position, position+17, 4*self.blackPieces[position+17]))
-            if position // 8 < 7:
-                if position % 8 > 1 and not self.whitePieces[position+6]:
-                    moves.append((position, position+6, 4*self.blackPieces[position+6]))
-                if position % 8 < 6 and not self.whitePieces[position+10]:
-                    moves.append((position, position+10, 4*self.blackPieces[position+10]))
-            if position // 8 > 1:
-                if position % 8 < 7 and not self.whitePieces[position-15]:
-                    moves.append((position, position-15, 4*self.blackPieces[position-15]))
-                if position % 8 > 0 and not self.whitePieces[position-17]:
-                    moves.append((position, position-17, 4*self.blackPieces[position-17]))
-            if position // 8 > 0:
-                if position % 8 < 6 and not self.whitePieces[position-6]:
-                    moves.append((position, position-6, 4*self.blackPieces[position-6]))
-                if position % 8 > 1 and not self.whitePieces[position-10]:
-                    moves.append((position, position-10, 4*self.blackPieces[position-10]))
+        for position in range(64):
+            if self.toPlay == Colour.WHITE and self.whiteKnights[position]:
+                if position // 8 < 6:
+                    if position % 8 > 0 and not self.whitePieces[position+15]:
+                        moves.append((position, position+15, 4*self.blackPieces[position+15]))
+                    if position % 8 < 7 and not self.whitePieces[position+17]:
+                        moves.append((position, position+17, 4*self.blackPieces[position+17]))
+                if position // 8 < 7:
+                    if position % 8 > 1 and not self.whitePieces[position+6]:
+                        moves.append((position, position+6, 4*self.blackPieces[position+6]))
+                    if position % 8 < 6 and not self.whitePieces[position+10]:
+                        moves.append((position, position+10, 4*self.blackPieces[position+10]))
+                if position // 8 > 1:
+                    if position % 8 < 7 and not self.whitePieces[position-15]:
+                        moves.append((position, position-15, 4*self.blackPieces[position-15]))
+                    if position % 8 > 0 and not self.whitePieces[position-17]:
+                        moves.append((position, position-17, 4*self.blackPieces[position-17]))
+                if position // 8 > 0:
+                    if position % 8 < 6 and not self.whitePieces[position-6]:
+                        moves.append((position, position-6, 4*self.blackPieces[position-6]))
+                    if position % 8 > 1 and not self.whitePieces[position-10]:
+                        moves.append((position, position-10, 4*self.blackPieces[position-10]))
 
-        elif self.toPlay == Colour.BLACK and self.blackKnights[position]:
-            if position // 8 < 6:
-                if position % 8 > 0 and not self.blackPieces[position+15]:
-                    moves.append((position, position+15, 4*self.whitePieces[position+15]))
-                if position % 8 < 7 and not self.blackPieces[position+17]:
-                    moves.append((position, position+17, 4*self.whitePieces[position+17]))
-            if position // 8 < 7 and not self.blackPieces[position+6]:
-                if position % 8 > 1:
-                    moves.append((position, position+6, 4*self.whitePieces[position+6]))
-                if position % 8 < 6 and not self.blackPieces[position+10]:
-                    moves.append((position, position+10, 4*self.whitePieces[position+10]))
-            if position // 8 > 1:
-                if position % 8 < 7 and not self.blackPieces[position-15]:
-                    moves.append((position, position-15, 4*self.whitePieces[position-15]))
-                if position % 8 > 0 and not self.blackPieces[position-17]:
-                    moves.append((position, position-17, 4*self.whitePieces[position-17]))
-            if position // 8 > 0 and not self.blackPieces[position-6]:
-                if position % 8 < 6:
-                    moves.append((position, position-6, 4*self.whitePieces[position-6]))
-                if position % 8 > 1 and not self.blackPieces[position-10]:
-                    moves.append((position, position-10, 4*self.whitePieces[position-10]))
+            elif self.toPlay == Colour.BLACK and self.blackKnights[position]:
+                if position // 8 < 6:
+                    if position % 8 > 0 and not self.blackPieces[position+15]:
+                        moves.append((position, position+15, 4*self.whitePieces[position+15]))
+                    if position % 8 < 7 and not self.blackPieces[position+17]:
+                        moves.append((position, position+17, 4*self.whitePieces[position+17]))
+                if position // 8 < 7 and not self.blackPieces[position+6]:
+                    if position % 8 > 1:
+                        moves.append((position, position+6, 4*self.whitePieces[position+6]))
+                    if position % 8 < 6 and not self.blackPieces[position+10]:
+                        moves.append((position, position+10, 4*self.whitePieces[position+10]))
+                if position // 8 > 1:
+                    if position % 8 < 7 and not self.blackPieces[position-15]:
+                        moves.append((position, position-15, 4*self.whitePieces[position-15]))
+                    if position % 8 > 0 and not self.blackPieces[position-17]:
+                        moves.append((position, position-17, 4*self.whitePieces[position-17]))
+                if position // 8 > 0 and not self.blackPieces[position-6]:
+                    if position % 8 < 6:
+                        moves.append((position, position-6, 4*self.whitePieces[position-6]))
+                    if position % 8 > 1 and not self.blackPieces[position-10]:
+                        moves.append((position, position-10, 4*self.whitePieces[position-10]))
         return moves
 
-    def generatePseudoLegalPawnMoves(self, position) -> list[tuple[int, int, int]]:
+    def generatePseudoLegalPawnMoves(self) -> list[tuple[int, int, int]]:
         moves = []
-        if self.toPlay == Colour.WHITE and self.whitePawns[position]:
-            if position // 8 < 6 and not self.pieces[position+8]:
-                moves.append((position, position+8, 0))
-                if position // 8 == 1 and not self.pieces[position+16]:
-                    moves.append((position, position+16, 1))
-            if position // 8 < 6 and self.blackPieces[position+7] and position % 8 != 0:
-                moves.append((position, position+7, 4))
-            if position // 8 == 4 and posToIndex(self.enPassant) == position + 7 and position % 8 != 0:
-                moves.append((position, position+7, 5))
-            if position // 8 < 6 and position % 8 != 7 and self.blackPieces[position+9]:
-                moves.append((position, position+9, 4))
-            if position // 8 == 4 and posToIndex(self.enPassant) == position + 9 and position % 8 != 7:
-                moves.append((position, position+9, 5))
-            if position // 8 == 6 and not self.pieces[position+8]:
-                moves.append((position, position+8, 8))
-                moves.append((position, position+8, 9))
-                moves.append((position, position+8, 10))
-                moves.append((position, position+8, 11))
-            if position // 8 == 6 and self.blackPieces[position+7] and position % 8 != 0:
-                moves.append((position, position+7, 12))
-                moves.append((position, position+7, 13))
-                moves.append((position, position+7, 14))
-                moves.append((position, position+7, 15))
-            if position // 8 == 6 and position % 8 != 7 and self.blackPieces[position+9] :
-                moves.append((position, position+9, 12))
-                moves.append((position, position+9, 13))
-                moves.append((position, position+9, 14))
-                moves.append((position, position+9, 15))
+        for position in range(64):
+            if self.toPlay == Colour.WHITE and self.whitePawns[position]:
+                if position // 8 < 6 and not self.pieces[position+8]:
+                    moves.append((position, position+8, 0))
+                    if position // 8 == 1 and not self.pieces[position+16]:
+                        moves.append((position, position+16, 1))
+                if position // 8 < 6 and self.blackPieces[position+7] and position % 8 != 0:
+                    moves.append((position, position+7, 4))
+                if position // 8 == 4 and posToIndex(self.enPassant) == position + 7 and position % 8 != 0:
+                    moves.append((position, position+7, 5))
+                if position // 8 < 6 and position % 8 != 7 and self.blackPieces[position+9]:
+                    moves.append((position, position+9, 4))
+                if position // 8 == 4 and posToIndex(self.enPassant) == position + 9 and position % 8 != 7:
+                    moves.append((position, position+9, 5))
+                if position // 8 == 6 and not self.pieces[position+8]:
+                    moves.append((position, position+8, 8))
+                    moves.append((position, position+8, 9))
+                    moves.append((position, position+8, 10))
+                    moves.append((position, position+8, 11))
+                if position // 8 == 6 and self.blackPieces[position+7] and position % 8 != 0:
+                    moves.append((position, position+7, 12))
+                    moves.append((position, position+7, 13))
+                    moves.append((position, position+7, 14))
+                    moves.append((position, position+7, 15))
+                if position // 8 == 6 and position % 8 != 7 and self.blackPieces[position+9] :
+                    moves.append((position, position+9, 12))
+                    moves.append((position, position+9, 13))
+                    moves.append((position, position+9, 14))
+                    moves.append((position, position+9, 15))
 
-        elif self.toPlay == Colour.BLACK and self.blackPawns[position]:
-            if position // 8 > 1 and not self.pieces[position-8]:
-                moves.append((position, position-8, 0))
-                if position // 8 == 6 and not self.pieces[position-16]:
-                    moves.append((position, position-16, 1))
-            if position // 8 > 1 and self.whitePieces[position-7] and position % 8 != 7:
-                moves.append((position, position-7, 4))
-            if position // 8 == 3 and posToIndex(self.enPassant) == position - 7 and position % 8 != 7:
-                moves.append((position, position-7, 5))
-            if position // 8 > 1 and position % 8 != 0 and self.whitePieces[position-9]:
-                moves.append((position, position-9, 4))
-            if position // 8 == 3 and posToIndex(self.enPassant) == position - 9 and position % 8 != 0:
-                moves.append((position, position-9, 5))
-            if position // 8 == 1 and not self.pieces[position-8]:
-                moves.append((position, position-8, 8))
-                moves.append((position, position-8, 9))
-                moves.append((position, position-8, 10))
-                moves.append((position, position-8, 11))
-            if position // 8 == 1 and self.whitePieces[position-7] and position % 8 != 7:
-                moves.append((position, position-7, 12))
-                moves.append((position, position-7, 13))
-                moves.append((position, position-7, 14))
-                moves.append((position, position-7, 15))
-            if position // 8 == 1 and position % 8 != 0 and self.whitePieces[position-9]:
-                moves.append((position, position-9, 12))
-                moves.append((position, position-9, 13))
-                moves.append((position, position-9, 14))
-                moves.append((position, position-9, 15))
+            elif self.toPlay == Colour.BLACK and self.blackPawns[position]:
+                if position // 8 > 1 and not self.pieces[position-8]:
+                    moves.append((position, position-8, 0))
+                    if position // 8 == 6 and not self.pieces[position-16]:
+                        moves.append((position, position-16, 1))
+                if position // 8 > 1 and self.whitePieces[position-7] and position % 8 != 7:
+                    moves.append((position, position-7, 4))
+                if position // 8 == 3 and posToIndex(self.enPassant) == position - 7 and position % 8 != 7:
+                    moves.append((position, position-7, 5))
+                if position // 8 > 1 and position % 8 != 0 and self.whitePieces[position-9]:
+                    moves.append((position, position-9, 4))
+                if position // 8 == 3 and posToIndex(self.enPassant) == position - 9 and position % 8 != 0:
+                    moves.append((position, position-9, 5))
+                if position // 8 == 1 and not self.pieces[position-8]:
+                    moves.append((position, position-8, 8))
+                    moves.append((position, position-8, 9))
+                    moves.append((position, position-8, 10))
+                    moves.append((position, position-8, 11))
+                if position // 8 == 1 and self.whitePieces[position-7] and position % 8 != 7:
+                    moves.append((position, position-7, 12))
+                    moves.append((position, position-7, 13))
+                    moves.append((position, position-7, 14))
+                    moves.append((position, position-7, 15))
+                if position // 8 == 1 and position % 8 != 0 and self.whitePieces[position-9]:
+                    moves.append((position, position-9, 12))
+                    moves.append((position, position-9, 13))
+                    moves.append((position, position-9, 14))
+                    moves.append((position, position-9, 15))
         return moves
 
     def applyMove(self, move):
@@ -1138,10 +1144,9 @@ class Board:
                 value -= self.KING_POS_TABLE[i^56]
         return value
             
-    
-    def heuristicEval(self):
-        if self.gameOver():
-            return self.getResult()*10000
+    def heuristicEval(self, moves=None):
+        if self.gameOver(moves):
+            return self.getResult(moves)*10000
         mat_eval = self.evalMaterial()
         pos_eval = self.evalPositioning()
         return mat_eval+pos_eval
@@ -1195,7 +1200,7 @@ class Board:
         moves = self.orderMoves(moves)
 
         if len(moves) == 0:
-            value = self.heuristicEval()
+            value = self.heuristicEval(moves)
             newEntry = TTEntry(0, value, 1, self.age())
             self.transpositionTable[key] = newEntry
             return value
@@ -1242,7 +1247,8 @@ class Board:
             return value
         
     def quiescenceEval(self, depth, alpha=-float('inf'), beta=float('inf')):
-        moves = self.generateQuiescenceMoves()
+        allMoves = self.generateMoves()
+        moves = self.generateQuiescenceMoves(allMoves)
         moves = self.orderMoves(moves)
 
         key = self.generateTTKey()
@@ -1253,13 +1259,13 @@ class Board:
                 return transpositionEntry.value
 
         if depth == 0 or len(moves) == 0:
-            value = self.heuristicEval()
+            value = self.heuristicEval(allMoves)
             newEntry = TTEntry(0, value, 1, self.age())
             self.transpositionTable[key] = newEntry
             return value
         
         if self.toPlay == Colour.WHITE:
-            value = self.heuristicEval()
+            value = self.heuristicEval(allMoves)
             beatAlpha = False
             for move in moves:
                 self.applyMove(move)
@@ -1279,7 +1285,7 @@ class Board:
             self.transpositionTable[key] = newEntry
             return value
         else:
-            value = self.heuristicEval()
+            value = self.heuristicEval(allMoves)
             beatBeta = False
             for move in moves:
                 self.applyMove(move)
@@ -1299,10 +1305,12 @@ class Board:
             self.transpositionTable[key] = newEntry
             return value
     
-    def gameOver(self):
+    def gameOver(self, moves=None):
+        if moves == None:
+            moves = self.generateMoves()
         if self.halfMoveClock >= 100:
             return True
-        if len(self.generateMoves()) == 0:
+        if len(moves) == 0:
             return True
         if self.whitePawns.any() or self.whiteRooks.any() or self.whiteQueens.any() or self.blackPawns.any() or self.blackRooks.any() or self.blackQueens.any():
             return False
@@ -1312,28 +1320,32 @@ class Board:
             return False
         return True
 
-    def getResult(self):
-        if len(self.generateMoves()) == 0 and self.inCheck():
+    def getResult(self, moves=None):
+        if moves == None:
+            moves = self.generateMoves()
+        if len(moves) == 0 and self.inCheck()[0]:
             if self.toPlay == Colour.WHITE:
                 return -1
             else:
                 return 1
-        elif self.gameOver():
+        elif self.gameOver(moves):
             return 0
         else:
             return None
         
     def inCheck(self):
         flag = False
+        checkingPiecePositions = []
         self.toPlay = Colour.opposite(self.toPlay)
         moves = self.generatePseudoLegalMoves()
         for move in moves: 
             self.applyMove(move)
             if not self.blackKing.any() or not self.whiteKing.any():
                 flag = True
+                checkingPiecePositions.append(move[0])
             self.unmake(move)
         self.toPlay = Colour.opposite(self.toPlay)
-        return flag
+        return flag, checkingPiecePositions
 
     def copy(self):
         return Board(orig=self)
@@ -1341,10 +1353,36 @@ class Board:
     def generateMoves(self) -> list[tuple[int, int, int]]:
         moves = self.generatePseudoLegalMoves()
         legalMoves = []
-        if self.inCheck():
-            for move in moves:
-                if move[2] not in [2,3] and self.validMove(move):
-                    legalMoves.append(move)
+        inCheck, positions = self.inCheck()
+        if inCheck:
+            kingPos = self.whiteKing.index(1)
+            if len(positions) > 1:
+                for move in moves:
+                    if move[0] == kingPos and self.validMove(move):
+                        legalMoves.append(move)
+            else:
+                checkingPiecePosition = positions[0]
+                kingDiagonal = diagonalMask(kingPos)
+                kingAntiDiagonal = antiDiagonalMask(kingPos)
+                kingRank = rankMask(kingPos)
+                kingFile = fileMask(kingPos)
+                checkLine = None
+                if kingDiagonal[checkingPiecePosition]:
+                    checkLine = kingDiagonal
+                elif kingAntiDiagonal[checkingPiecePosition]:
+                    checkLine = kingAntiDiagonal
+                elif kingRank[checkingPiecePosition]:
+                    checkLine = kingRank
+                elif kingFile[checkingPiecePosition]:
+                    checkLine = kingRank
+                if checkLine != None:
+                    for move in moves:
+                        if move[2] not in [2,3] and ((move[0] == kingPos and not checkLine[move[1]]) or checkLine[move[1]]) and self.validMove(move):
+                            legalMoves.append(move)
+                else:
+                    for move in moves:
+                        if ((move[0] == kingPos and move[2] not in [2,3]) or move[1] == checkingPiecePosition) and self.validMove(move):
+                            legalMoves.append(move)
         else:
             if self.toPlay == Colour.WHITE:
                 kingPos = self.whiteKing.index(1)
@@ -1382,8 +1420,9 @@ class Board:
                         legalMoves.append(move)
         return legalMoves
     
-    def generateQuiescenceMoves(self) -> list[tuple[int, int, int]]:
-        moves = self.generateMoves()
+    def generateQuiescenceMoves(self, moves=None) -> list[tuple[int, int, int]]:
+        if moves == None:
+            moves = self.generateMoves()
         loudMoves = []
         for move in moves:
             if move[2] >= 4:
@@ -1394,11 +1433,13 @@ class Board:
         flag = True
         self.applyMove(move)
         nextMoves = self.generatePseudoLegalMoves()
-        for nextMove in nextMoves: 
-            self.applyMove(nextMove)
-            if not self.blackKing.any() or not self.whiteKing.any():
+        if self.toPlay == Colour.WHITE:
+            kingPos = self.blackKing.index(1)
+        else:
+            kingPos = self.whiteKing.index(1)
+        for nextMove in nextMoves:
+            if (nextMove[1] == kingPos):
                 flag = False
-            self.unmake(nextMove)
         self.unmake(move)
         return flag
             
@@ -1449,8 +1490,9 @@ class Board:
                 self.unmake(move)
         return bestMove, bestEval
 
-    def playGame(self, eval_depth=3):
-        while not self.gameOver():
+    def playGame(self, eval_depth=3, moves=-1):
+        while not self.gameOver() and moves != 0:
+            moves -= 1
             self.gcTranspositionTable()
             bestMove, bestEval = self.bestMove(eval_depth)
             self.applyMove(bestMove)
@@ -1532,9 +1574,9 @@ def bitMaskString(bits):
     return result
 
 def main():
-    board = Board('2r1qk2/p5pQ/1p2pn2/6r1/3RP3/P6R/2p2K1P/2B5 w - - 2 32')
+    board = Board()
     print(board.getString())
-    print(board.playGame(1))
+    print(board.playGame(1, moves=30))
 
 if __name__ == "__main__":
     main()
