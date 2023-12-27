@@ -3,6 +3,7 @@ from bitarray import bitarray
 from enum import Enum
 import random
 import copy
+import time
 
 class Colour(Enum):
     WHITE = 1
@@ -12,6 +13,12 @@ class Colour(Enum):
         if col == Colour.BLACK:
             return Colour.WHITE
         else:
+            return Colour.BLACK
+        
+    def fromString(string: str):
+        if string.lower() in ["w", "white"]:
+            return Colour.WHITE
+        if string.lower() in ["b", "black"]:
             return Colour.BLACK
         
 class Piece(Enum):
@@ -213,12 +220,12 @@ class Board:
             self.pieces = self.blackPieces | self.whitePieces
 
             self.toPlay = orig.toPlay
-            self.castlingRights = orig.castlingRights
+            self.castlingRights = copy.copy(orig.castlingRights)
             self.enPassant = orig.enPassant
             self.halfMoveClock = orig.halfMoveClock
             self.prevHalfMoveClock = orig.prevHalfMoveClock
             self.prevCapture = orig.prevCapture
-            self.prevCastlingRights = orig.prevCastlingRights
+            self.prevCastlingRights = copy.copy(orig.prevCastlingRights)
             self.prevEPs = orig.prevEPs
             self.fullMoves = orig.fullMoves
             self.transpositionTable = copy.copy(orig.transpositionTable)
@@ -809,10 +816,10 @@ class Board:
                 self.whiteRooks[startPos] = False
                 self.whiteRooks[endPos] = True
                 if startPos == 0:
-                    self.prevCastlingRights.append(self.castlingRights)
+                    self.prevCastlingRights.append(copy.copy(self.castlingRights))
                     self.castlingRights.discard('Q')
                 if startPos == 7:
-                    self.prevCastlingRights.append(self.castlingRights)
+                    self.prevCastlingRights.append(copy.copy(self.castlingRights))
                     self.castlingRights.discard('K')
 
             elif self.whiteQueens[startPos]:
@@ -820,7 +827,7 @@ class Board:
                 self.whiteQueens[endPos] = True
 
             elif self.whiteKing[startPos]:
-                self.prevCastlingRights.append(self.castlingRights)
+                self.prevCastlingRights.append(copy.copy(self.castlingRights))
                 self.castlingRights.discard('K')
                 self.castlingRights.discard('Q')
                 self.whiteKing[startPos] = False
@@ -857,10 +864,10 @@ class Board:
                     self.blackRooks[endPos] = False
                     self.prevCapture.append(Piece.ROOK)
                     if endPos == 56:
-                        self.prevCastlingRights.append(self.castlingRights)
+                        self.prevCastlingRights.append(copy.copy(self.castlingRights))
                         self.castlingRights.discard('q')
                     elif endPos == 63:
-                        self.prevCastlingRights.append(self.castlingRights)
+                        self.prevCastlingRights.append(copy.copy(self.castlingRights))
                         self.castlingRights.discard('k')
                 elif self.blackQueens[endPos]:
                     self.blackQueens[endPos] = False
@@ -901,10 +908,10 @@ class Board:
                 self.blackRooks[startPos] = False
                 self.blackRooks[endPos] = True
                 if startPos == 56:
-                    self.prevCastlingRights.append(self.castlingRights)
+                    self.prevCastlingRights.append(copy.copy(self.castlingRights))
                     self.castlingRights.discard('q')
                 if startPos == 63:
-                    self.prevCastlingRights.append(self.castlingRights)
+                    self.prevCastlingRights.append(copy.copy(self.castlingRights))
                     self.castlingRights.discard('k')
 
             elif self.blackQueens[startPos]:
@@ -912,7 +919,7 @@ class Board:
                 self.blackQueens[endPos] = True
 
             elif self.blackKing[startPos]:
-                self.prevCastlingRights.append(self.castlingRights)
+                self.prevCastlingRights.append(copy.copy(self.castlingRights))
                 self.castlingRights.discard('k')
                 self.castlingRights.discard('q')
                 self.blackKing[startPos] = False
@@ -949,10 +956,10 @@ class Board:
                     self.whiteRooks[endPos] = False
                     self.prevCapture.append(Piece.ROOK)
                     if endPos == 0:
-                        self.prevCastlingRights.append(self.castlingRights)
+                        self.prevCastlingRights.append(copy.copy(self.castlingRights))
                         self.castlingRights.discard('Q')
                     elif endPos == 7:
-                        self.prevCastlingRights.append(self.castlingRights)
+                        self.prevCastlingRights.append(copy.copy(self.castlingRights))
                         self.castlingRights.discard('K')
                 elif self.whiteQueens[endPos]:
                     self.whiteQueens[endPos] = False
@@ -1152,7 +1159,29 @@ class Board:
         return mat_eval+pos_eval
     
     def generateTTKey(self):
-        return self.getFENString()
+        result = self.whitePawns.to01()+self.whiteKnights.to01()+self.whiteBishops.to01()+self.whiteRooks.to01()+self.whiteQueens.to01()+str(self.whiteKing.index(1))
+        result += self.blackPawns.to01()+self.blackKnights.to01()+self.blackBishops.to01()+self.blackRooks.to01()+self.blackQueens.to01()+str(self.blackKing.index(1))
+        
+        result += ' '
+        if self.toPlay == Colour.WHITE:
+            result += 'w'
+        else:
+            result += 'b'
+        
+        result += ' '
+        if len(self.castlingRights) == 0:
+            result += '-'
+        else:
+            for item in self.castlingRights:
+                result += item
+        
+        result += ' '
+        if self.enPassant != '':
+            result += self.enPassant
+        else:
+            result += '-'
+
+        return result
     
     def age(self):
         if self.toPlay == Colour.WHITE:
@@ -1182,7 +1211,7 @@ class Board:
         boundedPositions.sort(key=lambda move: move[1], reverse=reversed)
         return [item[0] for item in evaluatedPositions]+[item[0] for item in boundedPositions]+unknownPositions
 
-    def eval(self, depth, alpha=-float('inf'), beta=float('inf')):
+    def eval(self, depth, alpha=-float('inf'), beta=float('inf'), quiescenceDepth=10):
         key = self.generateTTKey()
         transpositionEntry = None
         if key in self.transpositionTable:
@@ -1191,7 +1220,7 @@ class Board:
                 return transpositionEntry.value
 
         if depth == 0:
-            value = self.quiescenceEval(8, alpha, beta)
+            value = self.quiescenceEval(quiescenceDepth, alpha, beta)
             newEntry = TTEntry(0, value, 1, self.age())
             self.transpositionTable[key] = newEntry
             return value
@@ -1210,7 +1239,7 @@ class Board:
             beatAlpha = False
             for move in moves:
                 self.applyMove(move)
-                value = max(value, self.eval(depth-1, alpha, beta))
+                value = max(value, self.eval(depth-1, alpha, beta, quiescenceDepth))
                 self.unmake(move)
                 if value > beta:
                     newEntry = TTEntry(depth, value, 2, self.age())
@@ -1230,7 +1259,7 @@ class Board:
             beatBeta = False
             for move in moves:
                 self.applyMove(move)
-                value = min(value, self.eval(depth-1, alpha, beta))
+                value = min(value, self.eval(depth-1, alpha, beta, quiescenceDepth))
                 self.unmake(move)
                 if value < alpha:
                     newEntry = TTEntry(depth, value, 3, self.age())
@@ -1255,7 +1284,7 @@ class Board:
         transpositionEntry = None
         if key in self.transpositionTable:
             transpositionEntry = self.transpositionTable[key]
-            if transpositionEntry.type == 1 and transpositionEntry.depth >= depth:
+            if transpositionEntry.type == 1:
                 return transpositionEntry.value
 
         if depth == 0 or len(moves) == 0:
@@ -1355,7 +1384,10 @@ class Board:
         legalMoves = []
         inCheck, positions = self.inCheck()
         if inCheck:
-            kingPos = self.whiteKing.index(1)
+            if self.toPlay == Colour.WHITE:
+                kingPos = self.whiteKing.index(1)
+            else:
+                kingPos = self.blackKing.index(1)
             if len(positions) > 1:
                 for move in moves:
                     if move[0] == kingPos and self.validMove(move):
@@ -1374,7 +1406,7 @@ class Board:
                 elif kingRank[checkingPiecePosition]:
                     checkLine = kingRank
                 elif kingFile[checkingPiecePosition]:
-                    checkLine = kingRank
+                    checkLine = kingFile
                 if checkLine != None:
                     for move in moves:
                         if move[2] not in [2,3] and ((move[0] == kingPos and not checkLine[move[1]]) or checkLine[move[1]]) and self.validMove(move):
@@ -1393,7 +1425,14 @@ class Board:
                 for move in moves:
                     if move[2] == 5 or move[0] == kingPos:
                         if self.validMove(move):
-                            legalMoves.append(move)
+                            if move[2] == 2:
+                                if self.validMove((4, 5, 0)):
+                                    legalMoves.append(move)
+                            elif move[2] == 3:
+                                if self.validMove((4, 3, 0)):
+                                    legalMoves.append(move)
+                            else:
+                                legalMoves.append(move)
                     elif not ((kingDiagonal[move[0]] and (kingDiagonal & (self.blackBishops | self.blackQueens)).any() and not kingDiagonal[move[1]]) 
                               or (kingAntiDiagonal[move[0]] and (kingAntiDiagonal & (self.blackBishops | self.blackQueens)).any() and not kingAntiDiagonal[move[1]]) 
                               or (kingRank[move[0]] and (kingRank & (self.blackRooks | self.blackQueens)).any() and not kingRank[move[1]])
@@ -1410,7 +1449,14 @@ class Board:
                 for move in moves:
                     if move[2] == 5 or move[0] == kingPos:
                         if self.validMove(move):
-                            legalMoves.append(move)
+                            if move[2] == 2:
+                                if self.validMove((60, 61, 0)):
+                                    legalMoves.append(move)
+                            elif move[2] == 3:
+                                if self.validMove((60, 59, 0)):
+                                    legalMoves.append(move)
+                            else:
+                                legalMoves.append(move)
                     elif not ((kingDiagonal[move[0]] and (kingDiagonal & (self.whiteBishops | self.whiteQueens)).any() and not kingDiagonal[move[1]]) 
                               or (kingAntiDiagonal[move[0]] and (kingAntiDiagonal & (self.whiteBishops | self.whiteQueens)).any() and not kingAntiDiagonal[move[1]]) 
                               or (kingRank[move[0]] and (kingRank & (self.whiteRooks | self.whiteQueens)).any() and not kingRank[move[1]])
@@ -1425,7 +1471,7 @@ class Board:
             moves = self.generateMoves()
         loudMoves = []
         for move in moves:
-            if move[2] >= 4:
+            if move[2] >= 8 or move[2] == 4 and not (self.whitePawns[move[1]] or self.blackPawns[move[1]]):
                 loudMoves.append(move)
         return loudMoves
     
@@ -1467,34 +1513,37 @@ class Board:
             if self.transpositionTable[key].age <= age:
                 self.transpositionTable.pop(key)
 
-    def bestMove(self, eval_depth=3):
+    def bestMove(self, eval_depth=3, quiescenceDepth=10, perMove=10):
+        start = time.time()
         moves = self.generateMoves()
-        for depth in range(eval_depth):
+        for depth in range(eval_depth+1):
             moves = self.orderMoves(moves)
             bestMove = moves[0]
             self.applyMove(bestMove)
-            bestEval = self.eval(depth)
+            bestEval = self.eval(depth, quiescenceDepth=quiescenceDepth)
             self.unmake(bestMove)
             for move in moves[1:]:
                 self.applyMove(move)
                 if self.toPlay == Colour.BLACK:
-                    eval = self.eval(depth, beta=bestEval)
+                    eval = self.eval(depth, alpha=bestEval, quiescenceDepth=quiescenceDepth)
                     if eval > bestEval:
                         bestEval = eval
                         bestMove = move
                 else:
-                    eval = self.eval(depth, alpha=bestEval)
+                    eval = self.eval(depth, beta=bestEval, quiescenceDepth=quiescenceDepth)
                     if eval < bestEval:
                         bestEval = eval
                         bestMove = move
                 self.unmake(move)
+                if time.time() - start > perMove:
+                    return bestMove, bestEval
         return bestMove, bestEval
 
-    def playGame(self, eval_depth=3, moves=-1):
+    def playGame(self, eval_depth=3, moves=-1, quiescenceDepth=10, perMove=10):
         while not self.gameOver() and moves != 0:
             moves -= 1
             self.gcTranspositionTable()
-            bestMove, bestEval = self.bestMove(eval_depth)
+            bestMove, bestEval = self.bestMove(eval_depth, quiescenceDepth=quiescenceDepth, perMove=perMove)
             self.applyMove(bestMove)
             print(self.getString())
             print(bestEval)
@@ -1573,10 +1622,34 @@ def bitMaskString(bits):
         result += '\n'
     return result
 
-def main():
-    board = Board()
+def playAgainstEngine(FEN=None):
+    board = Board(FEN)
     print(board.getString())
-    print(board.playGame(1, moves=30))
+    chosen = Colour.fromString(input("play as white(w) or black(b)?"))
+    if  board.toPlay == chosen:
+        response_0 = posToIndex(input("start position: "))
+        response_1 = posToIndex(input("end position: "))
+        response_2 = int(input("move code: "))
+        board.applyMove((response_0, response_1, response_2))
+        print(board.getString())
+    while not board.gameOver():
+        bestMove, bestEval = board.bestMove(4, 4, 15)
+        board.applyMove(bestMove)
+        print(board.getString())
+        print(bestMove, bestEval)
+        if board.gameOver():
+            break
+        response_0 = posToIndex(input("start position: "))
+        response_1 = posToIndex(input("end position: "))
+        response_2 = int(input("move code: "))
+        board.applyMove((response_0, response_1, response_2))
+        print(board.getString())
+    print(board.getResult())
+
+def main():
+    # '3r1rk1/pp1n2b1/1qp3p1/4p1Np/4Q1n1/3P2P1/PPP3BP/R1B2R1K b - - 0 17'
+    playAgainstEngine()
+    
 
 if __name__ == "__main__":
     main()
