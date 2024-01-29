@@ -1,0 +1,107 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+
+\begin{document}
+
+\part*{Progress Report}
+
+\textbf{Name:} Kai Tanna-Shah\\
+\textbf{Email:} kt507@cam.ac.uk\\
+\textbf{Title:} Creating an Interpretable Chess Engine\\
+\textbf{Supervisor:} David Khachaturov\\
+\textbf{Director of Studies:} Dr John Fawcett\\
+\textbf{Project Checkers:} Simone Teufel, Richard Mortier
+
+\section*{Work Completed:}
+\begin{itemize}
+    \item The core representation of the chess board has been completed and tested. The generation of moves has been verified using the perft algorithm on multiple positions, which ensures that my move generation function generates the correct number of leaf nodes up to a certain depth.
+    \item I have created a functioning chess engine, by writing a trivial function to evaluate a position based on material count and if the game has a result. I then implemented the minimax algorithm to search for the best move at a certain depth.
+    \item I improved the heuristic evaluation function to also consider the position of the pieces, with weights for each piece and board position.
+    \item I added alpha-beta pruning and iterative deepening to the minimax search, allowing the engine to search to a greater depth in the same amount of time.
+    \item I implemented a quiescence search to the engine, which allows it to search positions to a greater depth when there are captures available in the leaf nodes.
+    \item I have not yet written the functions to extract certain features from a position, such as the pawn structure and other strategical aspects.
+    \item I decided to deviate from my initial plan of work, and implement the optimisations to the minimax search before adding more features to the evaluation function, because the engine was too slow to be able to assess whether adding new features would improve the performance of the engine. 
+\end{itemize}
+
+\section*{Updated Work Plan:}
+\begin{enumerate}
+    \item Lent weeks 3-4 (1st February - 14th February)
+    \begin{itemize}
+        \item Write functions to extract features from a chess position, to be used in the evaluation function
+        \item Extend the minimax algorithm to pass weightings of how much each feature contributed to the evaluation up the search tree
+        \item Fit a linear regression model to get new weights for the features
+        \item Prepare and present progress report
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Progress report presentation (Deadline 7th February)
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 16th February)
+    \end{itemize}
+
+    \item Lent weeks 5-6 (15th February - 28th February)
+    \begin{itemize}
+        \item Evaluate the chess engine against other chess engines in order to estimate its ELO
+        \item Evaluate the explanations by testing the engine on a puzzle with known tactical or strategic themes, to see if the engine is able to identify them correctly
+    \end{itemize}
+    Milestone
+    \begin{itemize}
+        \item Completed evaluation of the core chess engine
+    \end{itemize}
+
+    \item Lent weeks 7-8 (29th February - 13th March)
+    \begin{itemize}
+        \item Begin writing preparation section of the dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Completed project
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 15th March)
+    \end{itemize}
+
+    \item Easter Vacation weeks 1-2 (14th March - 27th March)
+    \begin{itemize}
+        \item Finish writing preparation section of dissertation
+        \item Write implementation section of dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item First draft of preparation and implementation sections submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter Vacation weeks 3-4 (28th March - 10th April)
+    \begin{itemize}
+        \item Write evaluation and conclusion sections of dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item First draft of dissertation submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter Vacation weeks 5-6 (11th April - 24th April)
+    \begin{itemize}
+        \item Review feedback and make changes to the dissertation 
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Final draft of dissertation submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter weeks 1-2 (25th April - 8th May)
+    \begin{itemize}
+        \item Make final changes to dissertation based on continued feedback
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Project source code and dissertation (deadline 10th May)
+    \end{itemize}
+
+\end{enumerate}
+\end{document}
+
+
