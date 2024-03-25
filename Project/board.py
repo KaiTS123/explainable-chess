@@ -1151,12 +1151,21 @@ class Board:
                 value -= self.KING_POS_TABLE[i^56]
         return value
             
+    def evalDoubledPawns(self, penalty=30):
+        value = 0
+        for i in range(8):
+            file = bitarray('1000000010000000100000001000000010000000100000001000000010000000') >> i
+            value -= penalty * ((file & self.whitePawns).count()- 1)
+            value += penalty * ((file & self.blackPawns).count()- 1)
+        return value
+
     def heuristicEval(self, moves=None):
         if self.gameOver(moves):
             return self.getResult(moves)*10000
         mat_eval = self.evalMaterial()
         pos_eval = self.evalPositioning()
-        return mat_eval+pos_eval
+        pawn_eval = self.evalDoubledPawns()
+        return mat_eval+pos_eval+pawn_eval
     
     def generateTTKey(self):
         result = self.whitePawns.to01()+self.whiteKnights.to01()+self.whiteBishops.to01()+self.whiteRooks.to01()+self.whiteQueens.to01()+str(self.whiteKing.index(1))
@@ -1649,6 +1658,58 @@ def playAgainstEngine(FEN=None):
 def main():
     # '3r1rk1/pp1n2b1/1qp3p1/4p1Np/4Q1n1/3P2P1/PPP3BP/R1B2R1K b - - 0 17'
     playAgainstEngine()
+
+    while True:
+        command = input().strip()
+
+        if command == "xboard":
+            # Respond to xboard command
+            print("feature done=0")
+            print("feature myname=\"ExplainableEngine\"")
+            print("feature ping=1")
+            print("feature setboard=1")
+
+        elif command == "new":
+            # Respond to new game command
+            board = Board()
+
+        elif command.startswith("force"):
+            # Respond to force mode command
+            pass
+
+        elif command.startswith("protover"):
+            # Respond to protocol version command
+            print("feature done=1")
+
+        elif command.startswith("quit"):
+            # Respond to quit command
+            break
+
+        elif command.startswith("go"):
+            # Respond to go command
+            move = board.bestMove(4, 10, 10)
+            board.applyMove(move)
+            algebraic_move = indexToPos(move[0])+indexToPos(move[1])
+            print("move", algebraic_move)
+
+        elif command.startswith("usermove"):
+            # Handle user move
+            algebraic_move = command.split()[1]
+            move = board.findMove(algebraic_move)
+            board.applyMove(move)
+
+        elif command.startswith("ping"):
+            # Respond to ping command
+            print("pong", command.split()[1])
+
+        elif command.startswith("setboard"):
+            # Set the board to the given position
+            fen = " ".join(command.split()[1:])
+            board = Board(fen)
+
+        else:
+            # Unknown command, send "Error" response
+            print("Error")
     
 
 if __name__ == "__main__":
