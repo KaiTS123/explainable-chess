@@ -1,3 +1,5 @@
+from enum import Enum
+
 class Piece(Enum):
     PAWN = 1
     BISHOP = 2

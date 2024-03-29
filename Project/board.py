@@ -1,13 +1,8 @@
 import numpy as np
 from bitarray import bitarray
-from enum import Enum
-import random
 import copy
-import time
-import sys
 import colour
 from bitarray_masks import *
-import ttentry
 import piece
 
 

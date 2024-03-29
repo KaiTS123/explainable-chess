@@ -121,8 +121,8 @@ class Engine:
         return value
 
     def heuristicEval(self, moves=None):
-        if self.gameOver(moves):
-            return self.getResult(moves)*10000
+        if self.board.gameOver(moves):
+            return self.board.getResult(moves)*10000
         mat_eval = self.evalMaterial()
         pos_eval = self.evalPositioning()
         pawn_eval = self.evalDoubledPawns()
@@ -130,14 +130,14 @@ class Engine:
     
     def orderMoves(self, moves):
         reversed = False
-        if self.toPlay == colour.Colour.WHITE:
+        if self.board.toPlay == colour.Colour.WHITE:
             reversed = True
         evaluatedPositions = []
         boundedPositions = []
         unknownPositions = []
         for move in moves:
             self.board.applyMove(move)
-            key = self.generateTTKey()
+            key = self.board.generateTTKey()
             self.board.unmake(move)
             if key in self.transpositionTable:
                 transpositionEntry = self.transpositionTable[key]
@@ -174,7 +174,7 @@ class Engine:
             self.transpositionTable[key] = newEntry
             return value
         
-        if self.toPlay == colour.Colour.WHITE:
+        if self.board.toPlay == colour.Colour.WHITE:
             value = -float('inf')
             beatAlpha = False
             for move in moves:
@@ -233,7 +233,7 @@ class Engine:
             self.transpositionTable[key] = newEntry
             return value
         
-        if self.toPlay == colour.Colour.WHITE:
+        if self.board.toPlay == colour.Colour.WHITE:
             value = self.heuristicEval(allMoves)
             beatAlpha = False
             for move in moves:
@@ -293,7 +293,7 @@ class Engine:
             self.board.unmake(bestMove)
             for move in moves[1:]:
                 self.board.applyMove(move)
-                if self.toPlay == colour.Colour.BLACK:
+                if self.board.toPlay == colour.Colour.BLACK:
                     eval = self.eval(depth, alpha=bestEval, quiescenceDepth=quiescenceDepth)
                     if eval > bestEval:
                         bestEval = eval
@@ -453,7 +453,7 @@ def playXBoard():
 
 
 def main():
-    Engine.playXBoard()
+    playXBoard()
 
         
 # Redirect stderr to a file

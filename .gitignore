@@ -306,3 +306,4 @@ TSWLatexianTemp*
 Project/data/stockfish_evals/chessData.csv
 Project/data/stockfish_evals/random_evals.csv
 Project/data/stockfish_evals/tactic_evals.csv
+Project/__pycache__/*
