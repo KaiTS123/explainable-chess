@@ -383,7 +383,7 @@ def playXBoard():
             elif command.startswith("go"):
                 if engine.playing == engine.board.toPlay:
                     # Compute best response move
-                    move, eval = board.bestMove(4, 10, max(engine.remaining_time/40, (engine.opp_remaining_time-engine.remaining_time)/2)/100)
+                    move, eval = engine.bestMove(4, 10, max(engine.remaining_time/40, (engine.opp_remaining_time-engine.remaining_time)/2)/100)
                     engine.board.applyMove(move)
                     if move[2] >= 8:
                         algebraic_move = indexToPos(move[0])+indexToPos(move[1])+["n", "b", "r", "q"][move[2]]
@@ -414,7 +414,7 @@ def playXBoard():
                         print("1/2-1/2")
                 else:                
                     # Compute best response move
-                    move, eval = engine.bestMove(4, 10, engine.remaining_time/4000)
+                    move, eval = engine.bestMove(4, 10, max(engine.remaining_time/40, (engine.opp_remaining_time-engine.remaining_time)/2)/100)
                     engine.board.applyMove(move)
                     if move[2] >= 8:
                         algebraic_move = indexToPos(move[0])+indexToPos(move[1])+["n", "b", "r", "q"][move[2] % 4]
