@@ -1,4 +1,5 @@
 Description, Score_1500, Score_1700, Score_1900, ELO_Estimate, Accuracy
+All optimisations with material and piece-position and pawn structure and mobility and tapered eval, 9.5, 2.5, 0, 1616, 63
 All optimisations with material and piece-position and pawn structure and mobility, 9.5, 2.5, 0, 1616, 63
 All optimisations with material and piece-position and pawn structure, 7, 6.5, 0.5, 1672, 63
 All optimisations with material only, 3.5, 0, 0, 1308, 58

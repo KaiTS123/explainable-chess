@@ -167,7 +167,7 @@ class Engine:
             elif self.board.blackQueens[i]:
                 mg_value -= self.MG_QUEEN_POS_TABLE[i^56]
             elif self.board.whiteKing[i]:
-                mg_value += self.MG_ING_POS_TABLE[i]
+                mg_value += self.MG_KING_POS_TABLE[i]
             elif self.board.blackKing[i]:
                 mg_value -= self.MG_KING_POS_TABLE[i^56]
         eg_value = 0
