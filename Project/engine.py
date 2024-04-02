@@ -196,7 +196,7 @@ class Engine:
                 eg_value += self.EG_KING_POS_TABLE[i]
             elif self.board.blackKing[i]:
                 eg_value -= self.EG_KING_POS_TABLE[i^56]
-        return (mg_value*(24-phase)+eg_value*24)/24
+        return (mg_value*phase+eg_value*(24-phase))/24
             
     def evalDoubledPawns(self, penalty=30):
         value = 0
@@ -211,7 +211,7 @@ class Engine:
         self.board.toPlay = colour.Colour.opposite(self.board.toPlay)
         value -= len(self.board.generatePseudoLegalMoves())
         self.board.toPlay = colour.Colour.opposite(self.board.toPlay)
-        value *= weight*(24-phase)/24
+        value *= weight*phase/24
         if self.board.toPlay == colour.Colour.WHITE:
             return value
         else:
@@ -227,6 +227,7 @@ class Engine:
         phase -= self.board.blackKnights.count()
         phase -= 2*self.board.blackRooks.count()
         phase -= 4*self.board.blackQueens.count()
+        return phase
 
 
     def heuristicEval(self, moves=None):
