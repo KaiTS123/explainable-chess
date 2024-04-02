@@ -1,0 +1,299 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
+\graphicspath{ {images/} }
+
+
+\begin{document}
+
+\input{titlepage.tex}
+
+\section*{Declaration of Originality}
+
+I, Kai Tanna-Shah of Churchill College, being a candidate for Part II of the Computer Science Tripos, hereby declare that this dissertation and the work described in it are my own work, unaided except as may be specified below, and that the dissertation does not contain material that has already been used to any substantial extent for a comparable purpose. In preparation of this dissertation I did not use text from AI-assisted platforms generating natural language answers to user queries, including but not limited to ChatGPT. I am content for my dissertation to be made available to the students and staff of the University.
+\\\\
+Signed: Kai Tanna-Shah
+\\\\
+Date: April 2, 2024
+
+\pagebreak
+
+\part*{Proforma}
+\large
+\begin{tabular}{ l l}
+    Candidate Number: & \textbf{2198A} \\ 
+    Project Title:  & \textbf{Creating an Interpretable Chess Engine}\\  
+    Examination: & \textbf{Computer Science Tripos - Part II, 2023-2024}\\
+    Word Count: & \textbf{0}\\
+    Code Line Count: & \textbf{1700}\\ 
+    Project Originator: & \textbf{The candidate}\\   
+    Project Supervisor: & \textbf{David Khachaturov}
+   \end{tabular}
+
+\normalsize
+
+\section*{Original Aims of the Project}
+
+The aim of the project was to create a program which is able to evaluate chess positions and play chess against other programs (chess engines) or human opponents. I planned to experiment with which features of a chess position are most effective for determining the best move, and to provide explanations for the evaluations and moves. The engine should use standard search techniques used by other chess engines to reach an ELO of 1500 according to the CCRL ratings.
+
+\section*{Work Completed}
+
+
+\section*{Special Difficulties}
+I struggled to find an effective way to evaluate the explanations that the chess engine provides. As such, the project focussed more on evaluating the impact that using various features and techniques had on the performance of the engine.
+
+\pagebreak
+
+\part*{Project Proposal}
+
+\section*{Background}
+Since Deep Blue first beat Kasparov in 1997 there have been many chess engines which can far outperform the best humans in both speed and chess ability, such as Stockfish which is currently regarded as the most advanced chess engine. However there are not many chess engines which also provide explanations, or a way of interpreting why the suggested move and evaluation is correct. There is a commercially sold piece of software which does claim to achieve this, however they have not published details of how they determine the explanations.
+
+\paragraph*{Terms}
+\begin{itemize}
+    \item \textbf{ELO} - A method used to calculate the relative strength of players in chess and other zero-sum games
+    \item \textbf{Tactic} - A move or sequence of moves which gives a short term advantage to a player, often by forcing the opposing player to choose between two negative outcomes (such as by attacking two pieces at the same time)
+    \item \textbf{Strategy} - Long term ideas in the chess game to try to gain an advantage over the opponent, such as the structure of the pawns
+    \item \textbf{Evaluation} - In the context of chess, the evaluation function attempts to assign a value to the advantage that either player has, in terms of the number of pawns that the advantage is equivalent to (with an advantage for the white player being positive, and negative for white)
+\end{itemize}
+
+\section*{Introduction}
+Chess engines such as Stockfish are becoming increasingly more powerful, and are now able to easily outperform even the best humans with much less computation/thinking time per move. They achieve this by searching through the many possible positions that could be reached from the starting position, and evaluating them based on a number of features of the position. The best move can then be determined using the minimax algorithm, by selecting the move which results in the most favourable position (in terms of the evaluation) for the player. Many players use the evaluations and continuations of moves suggested by these engines to better understand positions and improve their ability. They often achieve this by looking through the various continuations of moves that the engine suggests in order to identify the tactical or strategical advantage that one move has over another.
+\\\\
+However, less experienced players will have more difficulty identifying these differences, since they will have encountered the tactical and strategic ideas less frequently in the games they have played. Furthermore, many beginners will not have been explicitly taught about some tactical ideas, and may not be able to understand why a position is favourable for one player even after going deep down a path of suggested moves. Understanding why a certain move was better than another is one of the most important aspects needed to learn from a mistake made in one game, and to make a better move in a similar position in future games. My project aims to provide both move suggestions and reasons for why the move is the best available. The reasoning will be in the form of which tactical and strategical features of the position had the biggest impact on determining which move is the best available in the position.
+
+\section*{Starting Point}
+The project will start from scratch, so I will devise and build the interpretable evaluation model first. This work is likely to use a library such as NumPy for the implementation of a linear regression model and any other models I use, since it will be better tested and optimized than my implementation of the same mathematical model would be.
+\\\\
+I have an understanding of the algorithms that I will be using for the engine, from the IB Artificial Intelligence course, the IB Data Science course, the IA Algorithms course and from my own interests, however I have no experience in building a chess engine. The Part II Natural Language Processing unit of assessment that I will take in Michaelmas 2023 will also add to my existing knowledge. I know how to play chess, and have a reasonable ability and understanding of the game.
+
+\section*{Success Criteria}
+\begin{itemize}
+    \item The project should be considered a success if the chess engine is able to produce evaluations of all legal chess positions, as well as the tactical and strategical aspects that contributed most to that evaluation. 
+    \item The project should be considered a success if the evaluation matches Stockfish in 80\% of test positions in assigning a position to approximately equal (-1.0 to 1.0 pawns), winning for white or winning for black.
+    \item The project should be considered very successful if I produce a chess engine that has an estimated ELO of above 1500 (estimated by testing the engine against other engines of a known ELO).
+    \item The project should be considered very successful if it is able to produce explanations for its evaluations and moves in natural language.
+    \item The project should be considered very successful if the explanations match the expected explanation for 80\% of the positions in a test suite (these positions will come from puzzles where the best move and explanation for this move is known, and then manually reviewed to check that the explanations match closely).
+\end{itemize}
+
+\section*{Work to be Undertaken}
+\begin{enumerate}
+    % \item \textbf{Preparing the data:}
+    % \\I will need to familiarize myself with different representations of chess positions, and decide on the best one to use based on how quickly I will be able to extract the tactical and strategical features, as well as which is supported by the engine I will use for my training data evaluations. I will also need to find and clean a dataset of chess positions in this representation to use as training and testing data for my interpretable model, by calculating the evaluation of each position using an existing chess engine.
+    \item \textbf{Implementing the chess engine:}
+    \\I will implement a chess engine using the minimax algorithm. The engine will be programmed in such a way that any function that takes in a position and outputs an evaluation can be used. During this stage I will test that the move generation is correct, and that all legal positions are being explored.
+
+    \item \textbf{Extracting features from a position:}
+    \\During this stage I will write functions to encode a chess position into a set of interpretable tactical and positional features, such as the material count of each side and whether a piece is attacking two other pieces at once. I will then create the initial evaluation function by manually deciding on weights for these features. In order to decide on which features to use, I will use educational chess material such as textbooks.
+
+    \item \textbf{Extending the chess engine to provide interpretations:}
+    \\I will extend the chess engine to use a weighted sum of the extracted features in the children positions of each node in the search tree. These feature weights will be passed up the search tree to the root node, to give weights to the most important features in determining the evaluation of the position.
+
+    \item \textbf{Fitting the evaluation function model:}
+    \\I will fit a linear regression model using a dataset of chess positions and the evaluation assigned to each position by Stockfish. The linear regression model will assign weights to each of the features extracted from the position, which will ensure the evaluations are still interpretable. I will also explore the possibility of other models that could be used here.
+
+    % \item \textbf{Devising the model:}
+    % \\I will need to investigate and decide on the model which is most appropriate for the project. This will involve researching and experimenting with multiple interpretable models to find one that provides both accurate evaluations as well as having clear interpretations. During this stage I will also need to decide on which features I use. The speed at which the model can generate evaluations for a new position will also be an important factor, since it will determine the search depth that I will be able to use in the engine.
+
+    % \item \textbf{Training the model:}
+    % \\Once I have chosen which model to use, I will need to train the model using the dataset that I have prepared. This stage may also involve the tuning of some hyperparameter depending on the model which I choose to use.
+    
+    \item \textbf{Evaluating the chess engine:}
+    \\There are two aspects of the chess engine which will need to be evaluated, the performance of the chess engine measured in ELO, and the explanations of its evaluations. The accuracy of the evaluations can be evaluated by testing its ability to beat chess engines of a variety of known ELO levels. The interpretations will be more difficult to evaluate, as they are often more subjective. One approach could be to find a dataset of puzzles which have a defined explanation for which is the best move.
+
+\end{enumerate}
+
+\section*{Extensions}
+\begin{enumerate}
+    % \item \textbf{GUI to highlight reasoning:}
+    % \\In order to make it easier for users to visualize the interpretations, I could design a graphical user interface which highlights and explains the tactical and strategic aspects of the position that contribute most to the evaluation.
+    \item \textbf{LLM to provide natural language explanations:}
+    \\In order to make the explanations for the evaluation easier to understand for beginners, I could use a Large Language Model (LLM) to combine the most important factors with explanations of how they create an advantage for one player to provide a more natural explanation. The LLM could be given the suggested move, the most important tactical and strategical features of the position, explanations of what these features are and how they create an advantage for one player as part of a prompt in order to provide an explanation in natural language.
+    \item \textbf{Using techniques to increase search depth:}
+    \\In order to improve the search depth that can be reached I could use search techniques such as alpha-beta pruning and iterative deepening in my chess engine to reduce the number of positions that need to be searched and evaluated at each depth. This will allow a greater search depth to be reached in the same amount of time.
+\end{enumerate}
+
+\section*{Timetable}
+\begin{enumerate}
+    \item Michaelmas weeks 2-3 (12th October - 25th October)
+    \begin{itemize}
+        \item Familiarize myself with the representation of chess positions and evaluations in the dataset
+        \item Research existing chess engines and their approaches to generating evaluations and moves
+        \item Set up the project and the repository, researching any libraries that I will need
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Final project proposal (Deadline 16th October)
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 26th October)
+    \end{itemize}
+
+    \item Michaelmas weeks 4-5 (26th October - 8th November)
+    \begin{itemize}
+        \item Write a framework to support representing chess positions, and applying moves to a position
+        \item Write a function to generate all of the legal moves in a position, and a function to check if a position is a valid chess board
+        \item Write unit tests to ensure that the framework is able to determine legal moves and positions
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 9th November)
+    \end{itemize}
+    Milestone
+    \begin{itemize}
+        \item A correct move generation function and support for applying these moves to a position
+    \end{itemize}
+
+    \item Michaelmas weeks 6-7 (9th November - 22nd November)
+    \begin{itemize}
+        \item Write a trivial evaluation function (material count and checkmate)
+        \item Implement the minimax search function
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item A functional chess engine
+    \end{itemize}
+
+    \item Michaelmas weeks 8 \& Christmas Vacation Week 1 (23rd November - 6th December)
+    \begin{itemize}
+        \item Decide on which features to extract from the position
+        \item Write the functions which extract the features from a position
+        \item Write an evaluation function which uses manually decided weightings of these features
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 1st December)
+    \end{itemize}
+    Milestone
+    \begin{itemize}
+        \item Chess engine using updated evaluation function
+    \end{itemize}
+
+    \item Christmas Vacation weeks 2-3 (7th December - 20th December)
+    \begin{itemize}
+        \item Extend the minimax algorithm to pass weightings of how much each feature contributed to the evaluation up the search tree
+        \item Fit a linear regression model to get new weights for the features
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Chess engine that provides weightings of features as well as evaluations
+    \end{itemize}
+
+    \item Christmas Vacation weeks 4-5 (21st December - 3rd January)
+    \begin{itemize}
+        \item Evaluate the chess engine against other chess engines in order to estimate its ELO
+        \item Evaluate the explanations by testing the engine on a puzzle with known tactical or strategic themes, to see if the engine is able to identify them correctly
+    \end{itemize}
+    Milestone
+    \begin{itemize}
+        \item Completed evaluation of the core chess engine
+    \end{itemize}
+
+    \item Christmas Vacation weeks 6-7 (4th January - 17th January)
+    \begin{itemize}
+        \item Apply alpha-beta pruning to the engine
+        \item Write a first draft of the progress report using the evaluations to be reviewed by my supervisor
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item First draft of progress report
+    \end{itemize}
+
+    \item Lent weeks 1-2 (18th January - 31st January)
+    \begin{itemize}
+        \item Apply iterative deepening and other techniques I come across during research to improve the depth that the engine can search to
+        \item Finish the progress report with feedback from supervisor
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Progress report (Deadline 2nd February)
+    \end{itemize}
+
+    \item Lent weeks 3-4 (1st February - 14th February)
+    \begin{itemize}
+        \item Set up framework for using an LLM to convert the feature weights into an explanation in natural language
+        \item Prepare and present progress report
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Progress report presentation (Deadline 7th February)
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 16th February)
+    \end{itemize}
+
+    \item Lent weeks 5-6 (15th February - 28th February)
+    \begin{itemize}
+        \item Fine tune the prompt for the LLM
+        \item Run the evaluations for the updated versions of the chess engine
+    \end{itemize}
+    Milestone
+    \begin{itemize}
+        \item Final version of LLM prompt working with the rest of the chess engine
+    \end{itemize}
+
+    \item Lent weeks 7-8 (29th February - 13th March)
+    \begin{itemize}
+        \item Begin writing preparation section of the dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Completed project
+    \end{itemize}
+    Other work
+    \begin{itemize}
+        \item Unit of assessment assignment (Deadline 15th March)
+    \end{itemize}
+
+    \item Easter Vacation weeks 1-2 (14th March - 27th March)
+    \begin{itemize}
+        \item Finish writing preparation section of dissertation
+        \item Write implementation section of dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item First draft of preparation and implementation sections submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter Vacation weeks 3-4 (28th March - 10th April)
+    \begin{itemize}
+        \item Write evaluation and conclusion sections of dissertation
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item First draft of dissertation submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter Vacation weeks 5-6 (11th April - 24th April)
+    \begin{itemize}
+        \item Review feedback and make changes to the dissertation 
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Final draft of dissertation submitted to supervisor and director of studies
+    \end{itemize}
+
+    \item Easter weeks 1-2 (25th April - 8th May)
+    \begin{itemize}
+        \item Make final changes to dissertation based on continued feedback
+    \end{itemize}
+    Deliverables
+    \begin{itemize}
+        \item Project source code and dissertation (deadline 10th May)
+    \end{itemize}
+
+\end{enumerate}
+
+\section*{Resources}
+\begin{enumerate}
+    \item For the development and writing of the project and dissertation, I will primarily use my personal laptop (M1 MacBook, 256GB SSD, 8GB memory). In case of a laptop failure, I have access to college computers in the library, spare laptops from my family, or purchasing a replacement laptop. I will use GitHub for version control, as well as Google Drive for backing up my code and any written work. The Google Drive backups will be made automatically whenever changes are made to the files. I accept full responsibility for this machine and I have made contingency plans to protect myself against hardware and/or software failure.
+    \item I will use a dataset of chess positions which I will acquire from the internet to be used for training and testing data. The positions will be labelled with evaluations from the Stockfish chess engine, and will be used as a source of "ground-truth" evaluations for training and testing
+    \item A set of puzzles with solutions which I will acquire from the internet to be used in the evaluation of the interpretations that my engine produces.
+    \item Access to 4 RTX 8000 GPUs through my supervisor's group, which can be used to run an LLM to generate natural language explanations.
+\end{enumerate}
+% \bibliographystyle{unsrt}
+% \bibliography{references}
+
+\end{document}
