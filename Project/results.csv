@@ -1,6 +1,7 @@
 Description, Score_1500, Score_1700, Score_1900, ELO_Estimate, Accuracy
+All optimisations with material and piece-position and pawn structure and mobility, 9.5, 2.5, 0, 1616, 63
 All optimisations with material and piece-position and pawn structure, 7, 6.5, 0.5, 1672, 63
 All optimisations with material only, 3.5, 0, 0, 1308, 58
 All optimisations with material and piece-position, 5.5, 3.5, 0, 1526, 62
-All optimisations except quiescence search with material and piece-position and pawn structure, 7, 6.5, 0, 1672, 54
+All optimisations except quiescence search with material and piece-position and pawn structure, 1.5, 0.5, 0, 1209, 54
 All optimisations except iterative deepening with material and piece-position and pawn strure, 6.5, 6, 0, 1630, 63

@@ -10,7 +10,7 @@ def main():
             if (i % 10000 == 1 and i < 1000000):
                 fen = row[0]
                 eng = engine.Engine(fen)
-                evaluation = eng.eval_iterative_deepening(5)
+                evaluation = eng.eval_iterative_deepening(4)
                 test_eval = row[1]
                 if test_eval[0] == "#":
                     if test_eval[1] == "+" and evaluation > 100:
