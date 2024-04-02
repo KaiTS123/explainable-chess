@@ -126,7 +126,7 @@ class Engine:
         mat_eval = self.evalMaterial()
         pos_eval = self.evalPositioning()
         pawn_eval = self.evalDoubledPawns()
-        return mat_eval+pos_eval+pawn_eval
+        return mat_eval + pos_eval + pawn_eval
     
     def orderMoves(self, moves):
         reversed = False
@@ -150,6 +150,26 @@ class Engine:
         evaluatedPositions.sort(key=lambda move: move[1], reverse=reversed)
         boundedPositions.sort(key=lambda move: move[1], reverse=reversed)
         return [item[0] for item in evaluatedPositions]+[item[0] for item in boundedPositions]+unknownPositions
+
+    def eval_iterative_deepening(self, eval_depth, quiescenceDepth=10):
+        moves = self.board.generateMoves()
+        for depth in range(eval_depth+1):
+            moves = self.orderMoves(moves)
+            self.board.applyMove(moves[0])
+            bestEval = self.eval(depth, quiescenceDepth=quiescenceDepth)
+            self.board.unmake(moves[0])
+            for move in moves[1:]:
+                self.board.applyMove(move)
+                if self.board.toPlay == colour.Colour.BLACK:
+                    eval = self.eval(depth, alpha=bestEval, quiescenceDepth=quiescenceDepth)
+                    if eval > bestEval:
+                        bestEval = eval
+                else:
+                    eval = self.eval(depth, beta=bestEval, quiescenceDepth=quiescenceDepth)
+                    if eval < bestEval:
+                        bestEval = eval
+                self.board.unmake(move)
+        return bestEval
 
     def eval(self, depth, alpha=-float('inf'), beta=float('inf'), quiescenceDepth=10):
         key = self.board.generateTTKey()
@@ -318,29 +338,29 @@ class Engine:
             print(bestEval)
         print(self.getResult())
     
-    def playAgainstEngine(FEN=None):
-        engine = Engine(FEN)
-        print(engine.board.getString())
-        chosen = colour.Colour.fromString(input("play as white(w) or black(b)?"))
-        if  engine.board.toPlay == chosen:
-            response_0 = posToIndex(input("start position: "))
-            response_1 = posToIndex(input("end position: "))
-            response_2 = int(input("move code: "))
-            board.applyMove((response_0, response_1, response_2))
-            print(board.getString())
-        while not board.gameOver():
-            bestMove, bestEval = board.bestMove(4, 4, 15)
-            board.applyMove(bestMove)
-            print(board.getString())
-            print(bestMove, bestEval)
-            if board.gameOver():
-                break
-            response_0 = posToIndex(input("start position: "))
-            response_1 = posToIndex(input("end position: "))
-            response_2 = int(input("move code: "))
-            board.applyMove((response_0, response_1, response_2))
-            print(board.getString())
-        print(board.getResult())
+def playAgainstEngine(FEN=None):
+    engine = Engine(FEN)
+    print(engine.board.getString())
+    chosen = colour.Colour.fromString(input("play as white(w) or black(b)?"))
+    if  engine.board.toPlay == chosen:
+        response_0 = posToIndex(input("start position: "))
+        response_1 = posToIndex(input("end position: "))
+        response_2 = int(input("move code: "))
+        board.applyMove((response_0, response_1, response_2))
+        print(board.getString())
+    while not board.gameOver():
+        bestMove, bestEval = board.bestMove(4, 4, 15)
+        board.applyMove(bestMove)
+        print(board.getString())
+        print(bestMove, bestEval)
+        if board.gameOver():
+            break
+        response_0 = posToIndex(input("start position: "))
+        response_1 = posToIndex(input("end position: "))
+        response_2 = int(input("move code: "))
+        board.applyMove((response_0, response_1, response_2))
+        print(board.getString())
+    print(board.getResult())
 
 def playXBoard():
     engine = Engine()
@@ -383,7 +403,7 @@ def playXBoard():
             elif command.startswith("go"):
                 if engine.playing == engine.board.toPlay:
                     # Compute best response move
-                    move, eval = engine.bestMove(4, 10, max(engine.remaining_time/40, (engine.opp_remaining_time-engine.remaining_time)/2)/100)
+                    move, eval = engine.bestMove(4, 10, engine.remaining_time/4000)
                     engine.board.applyMove(move)
                     if move[2] >= 8:
                         algebraic_move = indexToPos(move[0])+indexToPos(move[1])+["n", "b", "r", "q"][move[2]]
@@ -414,7 +434,7 @@ def playXBoard():
                         print("1/2-1/2")
                 else:                
                     # Compute best response move
-                    move, eval = engine.bestMove(4, 10, max(engine.remaining_time/40, (engine.opp_remaining_time-engine.remaining_time)/2)/100)
+                    move, eval = engine.bestMove(4, 10, engine.remaining_time/4000)
                     engine.board.applyMove(move)
                     if move[2] >= 8:
                         algebraic_move = indexToPos(move[0])+indexToPos(move[1])+["n", "b", "r", "q"][move[2] % 4]

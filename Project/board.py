@@ -609,8 +609,8 @@ class Board:
                         moves.append((position, position+15, 4*self.whitePieces[position+15]))
                     if position % 8 < 7 and not self.blackPieces[position+17]:
                         moves.append((position, position+17, 4*self.whitePieces[position+17]))
-                if position // 8 < 7 and not self.blackPieces[position+6]:
-                    if position % 8 > 1:
+                if position // 8 < 7:
+                    if position % 8 > 1 and not self.blackPieces[position+6]:
                         moves.append((position, position+6, 4*self.whitePieces[position+6]))
                     if position % 8 < 6 and not self.blackPieces[position+10]:
                         moves.append((position, position+10, 4*self.whitePieces[position+10]))
@@ -619,8 +619,8 @@ class Board:
                         moves.append((position, position-15, 4*self.whitePieces[position-15]))
                     if position % 8 > 0 and not self.blackPieces[position-17]:
                         moves.append((position, position-17, 4*self.whitePieces[position-17]))
-                if position // 8 > 0 and not self.blackPieces[position-6]:
-                    if position % 8 < 6:
+                if position // 8 > 0:
+                    if position % 8 < 6 and not self.blackPieces[position-6]:
                         moves.append((position, position-6, 4*self.whitePieces[position-6]))
                     if position % 8 > 1 and not self.blackPieces[position-10]:
                         moves.append((position, position-10, 4*self.whitePieces[position-10]))
@@ -1027,8 +1027,8 @@ class Board:
         self.pieces = self.blackPieces | self.whitePieces
     
     def generateTTKey(self):
-        result = self.whitePawns.to01()+self.whiteKnights.to01()+self.whiteBishops.to01()+self.whiteRooks.to01()+self.whiteQueens.to01()+str(self.whiteKing.index(1))
-        result += self.blackPawns.to01()+self.blackKnights.to01()+self.blackBishops.to01()+self.blackRooks.to01()+self.blackQueens.to01()+str(self.blackKing.index(1))
+        result = self.whitePawns.to01()+self.whiteKnights.to01()+self.whiteBishops.to01()+self.whiteRooks.to01()+self.whiteQueens.to01()+self.whiteKing.to01()
+        result += self.blackPawns.to01()+self.blackKnights.to01()+self.blackBishops.to01()+self.blackRooks.to01()+self.blackQueens.to01()+self.blackKing.to01()
         
         result += ' '
         if self.toPlay == colour.Colour.WHITE:
