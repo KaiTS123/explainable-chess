@@ -119,6 +119,17 @@ class Engine:
             value -= penalty * ((file & self.board.whitePawns).count()- 1)
             value += penalty * ((file & self.board.blackPawns).count()- 1)
         return value
+    
+    def evalMobility(self, weight=2):
+        value = len(self.board.generatePseudoLegalMoves())
+        self.board.toPlay = colour.Colour.opposite()
+        value -= len(self.board.generatePseudoLegalMoves())
+        self.board.toPlay = colour.Colour.opposite()
+        value *= weight
+        if self.board.toPlay == colour.Colour.WHITE:
+            return value
+        else:
+            return -value
 
     def heuristicEval(self, moves=None):
         if self.board.gameOver(moves):
@@ -126,7 +137,8 @@ class Engine:
         mat_eval = self.evalMaterial()
         pos_eval = self.evalPositioning()
         pawn_eval = self.evalDoubledPawns()
-        return mat_eval + pos_eval + pawn_eval
+        mob_eval = self.evalMobility()
+        return mat_eval + pos_eval + pawn_eval + mob_eval
     
     def orderMoves(self, moves):
         reversed = False
