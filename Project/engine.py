@@ -587,6 +587,11 @@ class Engine:
         self.gcTranspositionTable()
         start = time.time()
         moves = self.board.generateMoves()
+        if len(moves) == 1:
+            self.board.applyMove(moves[0])
+            eval = self.heuristicEval()
+            self.board.unmake(moves[0])
+            return moves[0], eval
         for depth in range(eval_depth+1):
             moves = self.orderMoves(moves)
             bestMove = moves[0]
@@ -614,6 +619,11 @@ class Engine:
         self.gcTranspositionTable()
         start = time.time()
         moves = self.board.generateMoves()
+        if len(moves) == 1:
+            self.board.applyMove(moves[0])
+            eval, reason = self.heuristicEvalReason()
+            self.board.unmake(moves[0])
+            return moves[0], eval, reason
         for depth in range(eval_depth+1):
             moves = self.orderMoves(moves)
             bestMove = moves[0]
