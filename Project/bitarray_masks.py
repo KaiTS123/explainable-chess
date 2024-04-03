@@ -62,6 +62,26 @@ def rookAttackMask(position: int):
 def bishopAttackMask(position: int):
     return diagonalMask(position) | antiDiagonalMask(position)
 
+def kingAttackMask(position: int):
+    result = bitarray('0000000000000000000000000000000000000000000000000000000000000000')
+    if position // 8 < 7:
+        if position % 8 > 0:
+            result[position+7] = True
+        if position % 8 < 7:
+            result[position+9] = True
+        result[position+8] = True
+    if position // 8 > 0:
+        if position % 8 > 0:
+            result[position-9] = True
+        if position % 8 < 7:
+            result[position-7] = True
+        result[position-8] = True
+    if position % 8 > 0:
+        result[position-1] = True
+    if position % 8 < 7:
+        result[position+1] = True
+    return result
+
 def bitMaskString(bits):
     result = ''
     for i in range(7,-1,-1):
@@ -73,3 +93,9 @@ def bitMaskString(bits):
         result += '\n'
     return result
 
+def moveToAlgebraic(move: tuple[int, int, int]):
+    if move[2] >= 8:
+        algebraic_move = indexToPos(move[0])+indexToPos(move[1])+["n", "b", "r", "q"][move[2]%4]
+    else:
+        algebraic_move = indexToPos(move[0])+indexToPos(move[1])
+    return algebraic_move

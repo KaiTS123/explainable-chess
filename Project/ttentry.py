@@ -5,7 +5,7 @@ class TTEntry():
         self.type = type
         self.age = age
 
-class ExpTTEntry(TTEntry):
-    def __init__(self, depth, value, type, age, exp_weights):
+class TTEntryReason(TTEntry):
+    def __init__(self, depth, value, type, age, reason):
         super().__init__(depth, value, type, age)
-        self.exp_weights = exp_weights
+        self.reason = reason
