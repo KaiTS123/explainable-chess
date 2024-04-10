@@ -7,10 +7,10 @@ def main():
         reader = csv.reader(test_data_file)
         correct = 0
         for i, row in enumerate(reader):
-            if (i % 10000 == 1 and i < 1000000):
+            if (i % 10000 == 2 and i < 1000000):
                 fen = row[0]
                 eng = engine.Engine(fen)
-                evaluation = eng.evalIterativeDeepening(3)
+                evaluation = eng.evalIterativeDeepening(5)
                 test_eval = row[1]
                 if test_eval[0] == "#":
                     if test_eval[1] == "+" and evaluation > 100:
