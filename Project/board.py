@@ -1213,9 +1213,6 @@ class Board:
             
     def perft(self, depth):
         moves = self.generateMoves()
-        if len(moves) == 0 or depth == 0:
-            return 1
-        
         if depth == 1:
             return len(moves)
         
@@ -1250,3 +1247,8 @@ class Board:
                 if (move[0] == move_start and move[1] == move_end):
                     return move
         return None
+
+if __name__ == "__main__":
+    fen = "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"
+    board = Board(fen)
+    print(board.perft(3))
