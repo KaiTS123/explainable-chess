@@ -1,4 +1,3 @@
-import numpy as np
 from bitarray import bitarray
 import copy
 import colour
@@ -1029,27 +1028,28 @@ class Board:
     def generateTTKey(self):
         result = self.whitePawns.to01()+self.whiteKnights.to01()+self.whiteBishops.to01()+self.whiteRooks.to01()+self.whiteQueens.to01()+self.whiteKing.to01()
         result += self.blackPawns.to01()+self.blackKnights.to01()+self.blackBishops.to01()+self.blackRooks.to01()+self.blackQueens.to01()+self.blackKing.to01()
-        
-        result += ' '
-        if self.toPlay == colour.Colour.WHITE:
-            result += 'w'
-        else:
-            result += 'b'
-        
-        result += ' '
-        if len(self.castlingRights) == 0:
-            result += '-'
-        else:
-            for item in self.castlingRights:
-                result += item
-        
-        result += ' '
-        if self.enPassant != '':
-            result += self.enPassant
-        else:
-            result += '-'
 
-        return result
+        if self.toPlay == colour.Colour.WHITE:
+            result += '1'
+        else:
+            result += '0'
+        
+        for right in "KQkq":
+            if right in self.castlingRights:
+                result += '1'
+            else:
+                result += "0"
+                
+        if self.enPassant == "":
+            result += "00000000"
+        else:
+            for file in "abcdefgh":
+                if file == self.enPassant[0]:
+                    result += '1'
+                else:
+                    result += "0"
+
+        return bitarray(result).tobytes()
     
     def age(self):
         if self.toPlay == colour.Colour.WHITE:
@@ -1188,7 +1188,7 @@ class Board:
                         legalMoves.append(move)
         return legalMoves
     
-    def generateQuiescenceMoves(self, moves=None) -> list[tuple[int, int, int]]:
+    def filterQuiescenceMoves(self, moves=None) -> list[tuple[int, int, int]]:
         if moves == None:
             moves = self.generateMoves()
         loudMoves = []

@@ -1,6 +1,17 @@
 from engine import *
 
+filename="communication.txt"
+
+def write_message(message):
+    with open(filename, "a") as file:
+        file.write(message+'\n')
+
+def clear_file():
+    with open(filename, "w") as file:
+        file.write("")
+
 def playXBoard():
+    clear_file()
     engine = Engine()
     while True:
         try:
@@ -14,6 +25,7 @@ def playXBoard():
                 # Respond to new game command
                 engine = Engine()
                 engine.playing = colour.Colour.BLACK
+                write_message("new")
 
             elif command.startswith("protover"):
                 # Respond to protocol version command
@@ -25,7 +37,9 @@ def playXBoard():
 
             elif command.startswith("quit"):
                 # Respond to quit command
-                break
+                clear_file()
+                time.sleep(1)
+                quit()
 
             elif command.startswith("time"):
                 engine.remaining_time = int(command.split()[1])
@@ -36,24 +50,22 @@ def playXBoard():
             elif command.startswith("go"):
                 if engine.playing == engine.board.toPlay:
                     # Compute best response move
-                    move, eval, reason = engine.bestMoveReason(5, 10, engine.remaining_time/(120*(45-(engine.board.fullMoves%40))))
+                    move, eval, reason = engine.bestMoveReason(6, 10, engine.remaining_time/(120*(45-(engine.board.fullMoves%40))))
                     engine.board.applyMove(move)
-                    print("Played move -:", moveToAlgebraic(move), file=sys.stderr)
-                    printEvalReason(eval, reason, file=sys.stderr)
                     print("move", moveToAlgebraic(move))
+                    write_message("engine "+ moveToAlgebraic(move))
 
             elif command.startswith("usermove"):
                 # Handle user move
                 algebraic_move = command.split()[1]
                 move = engine.board.findMove(algebraic_move)
-                print("Responding to move -:", algebraic_move, file=sys.stderr)
+                write_message("user "+ algebraic_move)
                 if move != None:
                     engine.board.applyMove(move)
                 else:
                     print("Illegal move:", move)
 
                 if engine.board.gameOver():
-                    print("Game over", file=sys.stderr)
                     result = engine.board.getResult()
                     if result == -1:
                         print("0-1")
@@ -63,11 +75,10 @@ def playXBoard():
                         print("1/2-1/2")
                 else:                
                     # Compute best response move
-                    move, eval, reason = engine.bestMoveReason(5, 10, engine.remaining_time/(120*(45-(engine.board.fullMoves%40))))
+                    move, eval, reason = engine.bestMoveReason(6, 10, engine.remaining_time/(120*(45-(engine.board.fullMoves%40))))
                     engine.board.applyMove(move)
-                    print("Played move -:", moveToAlgebraic(move), file=sys.stderr)
-                    printEvalReason(eval, reason, file=sys.stderr)
                     print("move", moveToAlgebraic(move))
+                    write_message("engine "+ moveToAlgebraic(move))
 
             elif command.startswith("ping"):
                 # Respond to ping command
@@ -94,8 +105,6 @@ def playXBoard():
 
 
 def main():
-    # Redirect stderr to a file for debugging with xboard
-    sys.stderr = open('xboard_reasons.log', 'w')
     playXBoard()
 
 if __name__ == "__main__":

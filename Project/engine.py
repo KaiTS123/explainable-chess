@@ -138,6 +138,8 @@ class Engine:
         # Transposition table with positions and their evaluations
         self.transpositionTable = {}
 
+        self.node_depths = {}
+
     def evalMaterial(self) -> int:
         whiteMaterial = self.board.whitePawns.count()*100 + self.board.whiteBishops.count()*300 + self.board.whiteKnights.count()*300 + self.board.whiteRooks.count()*500 + self.board.whiteQueens.count()*900
         blackMaterial = self.board.blackPawns.count()*100 + self.board.blackBishops.count()*300 + self.board.blackKnights.count()*300 + self.board.blackRooks.count()*500 + self.board.blackQueens.count()*900
@@ -295,36 +297,36 @@ class Engine:
         boundedPositions.sort(key=lambda move: move[1], reverse=reversed)
         return [item[0] for item in evaluatedPositions]+[item[0] for item in boundedPositions]+unknownPositions
 
-    def evalIterativeDeepening(self, eval_depth, quiescenceDepth=10):
+    def evalIterativeDeepening(self, eval_depth, quiescenceDepth=20, d=0):
+        self.node_depths[d] = self.node_depths.get(d, 0)+1
         moves = self.board.generateMoves()
-        for depth in range(eval_depth+1):
+        for depth in range(eval_depth):
             moves = self.orderMoves(moves)
             self.board.applyMove(moves[0])
-            bestEval = self.eval(depth, quiescenceDepth=quiescenceDepth)
+            bestEval = self.eval(depth, quiescenceDepth=quiescenceDepth, d=d+1)
             self.board.unmake(moves[0])
             for move in moves[1:]:
                 self.board.applyMove(move)
                 if self.board.toPlay == colour.Colour.BLACK:
-                    eval = self.eval(depth, alpha=bestEval, quiescenceDepth=quiescenceDepth)
-                    if eval > bestEval:
-                        bestEval = eval
+                    eval = self.eval(depth, alpha=bestEval, quiescenceDepth=quiescenceDepth, d=d+1)
+                    bestEval = max(bestEval, eval)
                 else:
-                    eval = self.eval(depth, beta=bestEval, quiescenceDepth=quiescenceDepth)
-                    if eval < bestEval:
-                        bestEval = eval
+                    eval = self.eval(depth, beta=bestEval, quiescenceDepth=quiescenceDepth, d=d+1)
+                    bestEval = min(bestEval, eval)
                 self.board.unmake(move)
         return bestEval
 
-    def eval(self, depth, alpha=-float('inf'), beta=float('inf'), quiescenceDepth=10):
+    def eval(self, depth, alpha=-float('inf'), beta=float('inf'), quiescenceDepth=10, d=0):
+        self.node_depths[d] = self.node_depths.get(d, 0)+1
         key = self.board.generateTTKey()
         transpositionEntry = None
         if key in self.transpositionTable:
             transpositionEntry = self.transpositionTable[key]
             if transpositionEntry.type == 1 and transpositionEntry.depth >= depth:
-                return transpositionEntry.value
+                return transpositionEntry.getValue()
 
         if depth == 0:
-            value = self.quiescenceEval(quiescenceDepth, alpha, beta)
+            value = self.quiescenceEval(quiescenceDepth, alpha, beta, d+1)
             newEntry = ttentry.TTEntry(0, value, 1, self.board.age())
             self.transpositionTable[key] = newEntry
             return value
@@ -340,43 +342,58 @@ class Engine:
         
         if self.board.toPlay == colour.Colour.WHITE:
             value = -float('inf')
-            beatAlpha = False
             for move in moves:
                 self.board.applyMove(move)
-                value = max(value, self.eval(depth-1, alpha, beta, quiescenceDepth))
+                value = max(value, self.eval(depth-1, alpha, beta, quiescenceDepth, d+1))
                 self.board.unmake(move)
                 if value > beta:
                     newEntry = ttentry.TTEntry(depth, value, 2, self.board.age())
                     self.transpositionTable[key] = newEntry
                     return value
-                if value > alpha:
-                    alpha = value
-                    beatAlpha = True
-            if beatAlpha:
-                newEntry = ttentry.TTEntry(depth, value, 1, self.board.age())
-            else:
-                newEntry = ttentry.TTEntry(depth, value, 3, self.board.age())
+                alpha = max(alpha, value)
+            newEntry = ttentry.TTEntry(depth, value, 1, self.board.age())
             self.transpositionTable[key] = newEntry
             return value
         else:
             value = float('inf')
-            beatBeta = False
             for move in moves:
                 self.board.applyMove(move)
-                value = min(value, self.eval(depth-1, alpha, beta, quiescenceDepth))
+                value = min(value, self.eval(depth-1, alpha, beta, quiescenceDepth, d+1))
                 self.board.unmake(move)
                 if value < alpha:
                     newEntry = ttentry.TTEntry(depth, value, 3, self.board.age())
                     self.transpositionTable[key] = newEntry
                     return value
-                if value < beta:
-                    beta = value
-                    beatBeta = True
-            if beatBeta:
-                newEntry = ttentry.TTEntry(depth, value, 1, self.board.age())
-            else:
-                newEntry = ttentry.TTEntry(depth, value, 2, self.board.age())
+                beta = min(beta, value)
+            newEntry = ttentry.TTEntry(depth, value, 1, self.board.age())
             self.transpositionTable[key] = newEntry
+            return value
+        
+    def evalWithoutAlphaBeta(self, depth, d=0):
+        self.node_depths[d] = self.node_depths.get(d, 0)+1
+        if depth == 0:
+            value = self.heuristicEval()
+            return value
+        
+        moves = self.board.generateMoves()
+
+        if len(moves) == 0:
+            value = self.heuristicEval(moves)
+            return value
+        
+        if self.board.toPlay == colour.Colour.WHITE:
+            value = -float('inf')
+            for move in moves:
+                self.board.applyMove(move)
+                value = max(value, self.evalWithoutAlphaBeta(depth-1, d+1))
+                self.board.unmake(move)
+            return value
+        else:
+            value = float('inf')
+            for move in moves:
+                self.board.applyMove(move)
+                value = min(value, self.evalWithoutAlphaBeta(depth-1, d+1))
+                self.board.unmake(move)
             return value
     
     def evalReason(self, depth, alpha=-float('inf'), beta=float('inf'), quiescenceDepth=10):
@@ -405,7 +422,6 @@ class Engine:
         if self.board.toPlay == colour.Colour.WHITE:
             value = -float('inf')
             reason = ["Err", 0, 0, 0, 0]
-            beatAlpha = False
             for move in moves:
                 self.board.applyMove(move)
                 move_value, move_reason = self.evalReason(depth-1, alpha, beta, quiescenceDepth)
@@ -417,19 +433,13 @@ class Engine:
                     newEntry = ttentry.TTEntryReason(depth, value, 2, self.board.age(), reason)
                     self.transpositionTable[key] = newEntry
                     return value, reason
-                if value > alpha:
-                    alpha = value
-                    beatAlpha = True
-            if beatAlpha:
-                newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
-            else:
-                newEntry = ttentry.TTEntryReason(depth, value, 3, self.board.age(), reason)
+                alpha = max(alpha, value)
+            newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
             self.transpositionTable[key] = newEntry
             return value, reason
         else:
             value = float('inf')
             reason = ["Err", 0, 0, 0, 0]
-            beatBeta = False
             for move in moves:
                 self.board.applyMove(move)
                 move_value, move_reason = self.evalReason(depth-1, alpha, beta, quiescenceDepth)
@@ -441,19 +451,15 @@ class Engine:
                     newEntry = ttentry.TTEntryReason(depth, value, 3, self.board.age(), reason)
                     self.transpositionTable[key] = newEntry
                     return value, reason
-                if value < beta:
-                    beta = value
-                    beatBeta = True
-            if beatBeta:
-                newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
-            else:
-                newEntry = ttentry.TTEntryReason(depth, value, 2, self.board.age(), reason)
+                beta = min(beta, value)
+            newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
             self.transpositionTable[key] = newEntry
             return value, reason
 
-    def quiescenceEval(self, depth, alpha=-float('inf'), beta=float('inf')):
+    def quiescenceEval(self, depth, alpha=-float('inf'), beta=float('inf'), d=0):
+        self.node_depths[d] = self.node_depths.get(d, 0)+1
         allMoves = self.board.generateMoves()
-        moves = self.board.generateQuiescenceMoves(allMoves)
+        moves = self.board.filterQuiescenceMoves(allMoves)
         moves = self.orderMoves(moves)
 
         key = self.board.generateTTKey()
@@ -471,48 +477,36 @@ class Engine:
         
         if self.board.toPlay == colour.Colour.WHITE:
             value = self.heuristicEval(allMoves)
-            beatAlpha = False
             for move in moves:
                 self.board.applyMove(move)
-                value = max(value, self.quiescenceEval(depth-1, alpha, beta))
+                value = max(value, self.quiescenceEval(depth-1, alpha, beta, d+1))
                 self.board.unmake(move)
                 if value >= beta:
                     newEntry = ttentry.TTEntry(0, value, 2, self.board.age())
                     self.transpositionTable[key] = newEntry
                     return value
-                if value > alpha:
-                    alpha = value
-                    beatAlpha = True
-            if beatAlpha:
-                newEntry = ttentry.TTEntry(0, value, 1, self.board.age())
-            else:
-                newEntry = ttentry.TTEntry(0, value, 3, self.board.age())
+                alpha = max(alpha, value)
+            newEntry = ttentry.TTEntry(0, value, 1, self.board.age())
             self.transpositionTable[key] = newEntry
             return value
         else:
             value = self.heuristicEval(allMoves)
-            beatBeta = False
             for move in moves:
                 self.board.applyMove(move)
-                value = min(value, self.quiescenceEval(depth-1, alpha, beta))
+                value = min(value, self.quiescenceEval(depth-1, alpha, beta, d+1))
                 self.board.unmake(move)
                 if value <= alpha:
                     newEntry = ttentry.TTEntry(0, value, 3, self.board.age())
                     self.transpositionTable[key] = newEntry
                     return value
-                if value < beta:
-                    beta = value
-                    beatBeta = True
-            if beatBeta:
-                newEntry = ttentry.TTEntry(0, value, 1, self.board.age())
-            else:
-                newEntry = ttentry.TTEntry(0, value, 2, self.board.age())
+                beta = min(beta, value)
+            newEntry = ttentry.TTEntry(0, value, 1, self.board.age())
             self.transpositionTable[key] = newEntry
             return value
     
     def quiescenceEvalReason(self, depth, alpha=-float('inf'), beta=float('inf')):
         allMoves = self.board.generateMoves()
-        moves = self.board.generateQuiescenceMoves(allMoves)
+        moves = self.board.filterQuiescenceMoves(allMoves)
         moves = self.orderMoves(moves)
         
         key = self.board.generateTTKey()
@@ -530,7 +524,6 @@ class Engine:
         
         if self.board.toPlay == colour.Colour.WHITE:
             value, reason = self.heuristicEvalReason(allMoves)
-            beatAlpha = False
             for move in moves:
                 self.board.applyMove(move)
                 move_value, move_reason = self.quiescenceEvalReason(depth-1, alpha, beta)
@@ -542,18 +535,12 @@ class Engine:
                     newEntry = ttentry.TTEntryReason(depth, value, 2, self.board.age(), reason)
                     self.transpositionTable[key] = newEntry
                     return value, reason
-                if value > alpha:
-                    alpha = value
-                    beatAlpha = True
-            if beatAlpha:
-                newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
-            else:
-                newEntry = ttentry.TTEntryReason(depth, value, 3, self.board.age(), reason)
+                alpha = max(alpha, value)
+            newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
             self.transpositionTable[key] = newEntry
             return value, reason
         else:
             value, reason = self.heuristicEvalReason(allMoves)
-            beatBeta = False
             for move in moves:
                 self.board.applyMove(move)
                 move_value, move_reason = self.quiescenceEvalReason(depth-1, alpha, beta)
@@ -565,13 +552,8 @@ class Engine:
                     newEntry = ttentry.TTEntryReason(depth, value, 3, self.board.age(), reason)
                     self.transpositionTable[key] = newEntry
                     return value, reason
-                if value < beta:
-                    beta = value
-                    beatBeta = True
-            if beatBeta:
-                newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
-            else:
-                newEntry = ttentry.TTEntryReason(depth, value, 2, self.board.age(), reason)
+                beta = min(beta, value)
+            newEntry = ttentry.TTEntryReason(depth, value, 1, self.board.age(), reason)
             self.transpositionTable[key] = newEntry
             return value, reason
         
@@ -648,87 +630,16 @@ class Engine:
                 if time.time() - start > perMove:
                     return bestMove, bestEval, bestReason
         return bestMove, bestEval, bestReason
-
-    def playGame(self, eval_depth=3, moves=-1, quiescenceDepth=10, perMove=10):
-        while not self.gameOver() and moves != 0:
-            moves -= 1
-            bestMove, bestEval = self.bestMove(eval_depth, quiescenceDepth=quiescenceDepth, perMove=perMove)
-            self.board.applyMove(bestMove)
-            print(self.getString())
-            print(bestEval)
-        print(self.getResult())
     
-def printEvalReason(eval, reason, file=sys.stdout):
-    heuristic_reasons = ["Game result: ", "Material score: ", "Piece positioning: ", "Pawn structure: ", "Mobility score: "]
-    print("Overall evaluation: ", eval, file=file)
-    for i in range(len(heuristic_reasons)):
-        print(heuristic_reasons[i], reason[i], file=file)
-
-def playAgainstEngine(FEN=None, perMove=15):
-    engine = Engine(FEN)
-    print(engine.board.getString())
-    chosen = colour.Colour.fromString(input("play as white(w) or black(b)?"))
-    if engine.board.toPlay == chosen:
-        move = engine.board.findMove(input("enter algebraic move: "))
-        engine.board.applyMove(move)
-        print(engine.board.getString())
-    while not engine.board.gameOver():
-        bestMove, bestEval = engine.bestMove(4, 4, perMove)
-        engine.board.applyMove(bestMove)
-        print(engine.board.getString())
-        print(moveToAlgebraic(bestMove), bestEval)
-        if engine.board.gameOver():
-            break
-        move = engine.board.findMove(input("enter algebraic move: "))
-        engine.board.applyMove(move)
-        print(engine.board.getString())
-    print(engine.board.getResult())
-
-def playAgainstEngineTutor(FEN=None, perMove=15):
-    engine = Engine(FEN)
-    print(engine.board.getString())
-    chosen = colour.Colour.fromString(input("play as white(w) or black(b)?"))
-    if engine.board.toPlay == chosen:
-        move = engine.board.findMove(input("enter algebraic move: "))
-        bestMove, bestEval, bestReason = engine.bestMoveReason(4, 10, perMove)
-        engine.board.applyMove(move)
-        userEval, userReason = engine.evalReason(4)
-        print(engine.board.getString())        
-        if bestEval == userEval:
-            print("You played the best move!")
-            printEvalReason(userEval, userReason)
-        else:
-            print("The move", moveToAlgebraic(bestMove), "was better than your move:")
-            printEvalReason(bestEval, bestReason)
-            print("\nCompared to your move:")
-            printEvalReason(userEval, userReason)
-    while not engine.board.gameOver():
-        bestMove, bestEval, bestReason = engine.bestMoveReason(4, 10, perMove)
-        engine.board.applyMove(bestMove)
-        print(engine.board.getString())
-        print(moveToAlgebraic(bestMove))
-        printEvalReason(bestEval, bestReason)
-        if engine.board.gameOver():
-            break
-        move = engine.board.findMove(input("enter algebraic move: "))
-        bestMove, bestEval, bestReason = engine.bestMoveReason(4, 10, perMove)
-        engine.board.applyMove(move)
-        userEval, userReason = engine.evalReason(4)
-        print(engine.board.getString())        
-        if bestEval == userEval:
-            print("You played the best move!")
-            printEvalReason(userEval, userReason)
-        else:
-            print("The move", moveToAlgebraic(bestMove), "was better than your move:")
-            printEvalReason(bestEval, bestReason)
-            print("\nCompared to your move:")
-            printEvalReason(userEval, userReason)
-    print(engine.board.getResult())
 
 def main():
     # Redirect stderr to a file for debugging with xboard
-    sys.stderr = open('xboard_reasons.log', 'w')
-    playAgainstEngineTutor()
+    # sys.stderr = open('xboard_reasons.log', 'w')
+    # playAgainstEngineTutor()
+
+    eng = Engine("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1")
+    eng.evalIterativeDeepening(3)
+    print(eng.node_depths)
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ def main():
             if (i % 10000 == 2 and i < 1000000):
                 fen = row[0]
                 eng = engine.Engine(fen)
-                evaluation = eng.evalIterativeDeepening(5)
+                evaluation = eng.evalIterativeDeepening(4)
                 test_eval = row[1]
                 if test_eval[0] == "#":
                     if test_eval[1] == "+" and evaluation > 100:
@@ -24,7 +24,7 @@ def main():
                             correct += 1
                     elif test_eval > 100 and evaluation > 100:
                         correct += 1
-                    elif test_eval < -100 and evaluation < -100:
+                    elif test_eval < -80 and evaluation < -80:
                         correct += 1
         print(correct)
 
