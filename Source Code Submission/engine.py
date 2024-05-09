@@ -138,6 +138,8 @@ class Engine:
         # Transposition table with positions and their evaluations
         self.transpositionTable = {}
 
+        self.node_depths = {}
+
     def evalMaterial(self, phase) -> int:
         mgMaterial = self.board.whitePawns.count()*82 + self.board.whiteKnights.count()*337 + self.board.whiteBishops.count()*365 + self.board.whiteRooks.count()*477 + self.board.whiteQueens.count()*1025
         mgMaterial -= self.board.blackPawns.count()*82 + self.board.blackKnights.count()*337 + self.board.blackBishops.count()*365 + self.board.blackRooks.count()*477 + self.board.blackQueens.count()*1025
@@ -636,3 +638,16 @@ class Engine:
                 if time.time() - start > perMove:
                     return bestMove, bestEval, bestReason, bestCont
         return bestMove, bestEval, bestReason, bestCont
+    
+
+def main():
+    # Redirect stderr to a file for debugging with xboard
+    # sys.stderr = open('xboard_reasons.log', 'w')
+    # playAgainstEngineTutor()
+
+    eng = Engine("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1")
+    eng.evalIterativeDeepening(3)
+    print(eng.node_depths)
+
+if __name__ == "__main__":
+    main()
